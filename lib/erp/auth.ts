@@ -81,7 +81,8 @@ export async function authenticate(
       db,
       `
     SELECT a.id, a.username, a.name, COALESCE(p.role,a.role) AS role FROM account a JOIN session s ON s.account_id = a.id LEFT JOIN portal_profile p ON p.account_id = a.id
-    WHERE s.token_hash = ? AND s.expires_at > ?`,
+    WHERE s.token_hash = ? AND s.expires_at > ?
+    AND (a.role <> 'commissioner' OR NOT EXISTS (SELECT 1 FROM school WHERE code = 'SOS-KATOL'))`,
       hashToken(token),
       Date.now(),
     ));
@@ -107,7 +108,7 @@ export async function login(
   await consumeLoginAttempt(db, username);
   const account = await one<{ id: string; password_hash: string }>(
     db,
-    'SELECT id, password_hash FROM account WHERE username = ?',
+    "SELECT id, password_hash FROM account WHERE username = ? AND (role <> 'commissioner' OR NOT EXISTS (SELECT 1 FROM school WHERE code = 'SOS-KATOL'))",
     username,
   );
   const [salt, digest] = (account?.password_hash ?? dummyHash).split(':');

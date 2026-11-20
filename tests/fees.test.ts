@@ -37,7 +37,12 @@ void test('campus setup, admissions, fees, retry protection, isolation and recei
     const office = accounts.find((a) => a.username === 'office')!;
     const principal = accounts.find((a) => a.username === 'principal')!;
     const teacher = accounts.find((a) => a.username === 'teacher')!;
-    const management = accounts.find((a) => a.username === 'management')!;
+    const management: Account = {
+      id: 'disabled',
+      username: 'management',
+      name: 'Legacy',
+      role: 'commissioner',
+    };
     const classroom = await one<{ id: string }>(
       db,
       'SELECT id FROM class_section',
@@ -184,7 +189,7 @@ void test('empty production campus bootstrap creates no fictional students or cl
     await bootstrapCampus(db, () => 'Fictional-Testing-6290');
     assert.equal((await many(db, 'SELECT * FROM enrolment')).length, 0);
     assert.equal((await many(db, 'SELECT * FROM class_section')).length, 0);
-    assert.equal((await many(db, 'SELECT username FROM account')).length, 7);
+    assert.equal((await many(db, 'SELECT username FROM account')).length, 6);
   } finally {
     db.close();
     rmSync(dir, { recursive: true, force: true });

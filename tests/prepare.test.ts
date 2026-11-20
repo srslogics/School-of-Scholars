@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -55,8 +56,38 @@ void test('deployment prepares a fresh database, signs in, and preserves credent
         db,
         'SELECT COUNT(*) AS count FROM account',
       ))!.count,
-      7,
+      6,
     );
+    await run(
+      db,
+      "INSERT INTO account VALUES ('legacy-management','management','Legacy Management','commissioner',?)",
+      passwordHash('sos2026'),
+    );
+    const oldToken = 'a'.repeat(64);
+    await run(
+      db,
+      'INSERT INTO session VALUES (?, ?, ?)',
+      createHash('sha256').update(oldToken).digest('hex'),
+      'legacy-management',
+      Date.now() + 60_000,
+    );
+    const denied = await handler(
+      new Request('http://localhost/api/erp/login', {
+        method: 'POST',
+        headers: {
+          origin: 'http://localhost',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ username: 'management', password: 'sos2026' }),
+      }),
+    );
+    assert.equal(denied.status, 401);
+    const oldSession = await handler(
+      new Request('http://localhost/api/erp/session', {
+        headers: { cookie: 'shiksha_erp_session=' + oldToken },
+      }),
+    );
+    assert.equal(oldSession.status, 401);
     await run(
       db,
       "INSERT INTO school VALUES ('unexpected','OTHER','Unexpected school')",

@@ -36,7 +36,7 @@ const roleLabel = {
   staff: 'Campus staff',
   principal: 'Principal',
   officer: 'School office',
-  commissioner: 'Management',
+  commissioner: 'Legacy account',
 };
 
 export function ErpWorkspace({

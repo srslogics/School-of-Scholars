@@ -109,7 +109,6 @@ export const workspaceLabels = {
   '/faculty-app': 'Faculty app',
   '/principal-app': 'Principal app',
   '/office-app': 'School office',
-  '/management-app': 'Management app',
 } as const;
 
 export type WorkspacePath = keyof typeof workspaceLabels;
@@ -121,7 +120,7 @@ const rolePaths: Record<Role, WorkspacePath> = {
   teacher: '/faculty-app',
   principal: '/principal-app',
   officer: '/office-app',
-  commissioner: '/management-app',
+  commissioner: '/erp',
 };
 export function workspacePath(role: Role): WorkspacePath {
   return rolePaths[role];

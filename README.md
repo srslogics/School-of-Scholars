@@ -15,15 +15,15 @@ Use Node 22.13+ within Node 22. Run:
 
 Bootstrap runs only once on an empty dedicated database. The sample option is restricted to local files. Initial passwords are sos2026 as requested. Account details are saved into the owner-only file .erp-data/katol-development.sqlite.accounts.json. They must not be committed or shared publicly.
 
-Open /erp. Account usernames are admin, principal, office, teacher, parent, staff and management. The local sample includes one Katol campus, one fictional class and one fictional student. Administrator setup configures approved classes and staff. Principal and office users enrol students and record charges/payments. Teachers access assigned attendance rosters. Management currently sees attendance summaries.
+Open /erp. Account usernames are admin, principal, office, teacher, parent and staff. The local sample includes one Katol campus, one fictional class and one fictional student. Administrator setup configures approved classes and staff. Principal and office users enrol students and record charges/payments. Teachers access assigned attendance rosters.
 
-Internal database role identifiers officer and commissioner are retained for compatibility with the inherited permission engine. New campus accounts use school-office and management names and labels. A separate Accounts role and management finance summaries are pending.
+The internal officer identifier is retained for school-office compatibility. Legacy commissioner accounts are disabled in the Katol installation. A separate Accounts role is pending.
 
 ## Shared database and fresh installation
 
 Use a separate Turso libSQL database and a separate Render Node web service for this school. Configure TURSO_DATABASE_URL, TURSO_AUTH_TOKEN and the public HTTPS origin (ERP_ORIGIN, or Render's RENDER_EXTERNAL_URL). No local disk is required for hosted persistence. Never reuse the NMC database or deployment.
 
-Run npm run bootstrap:school against the new empty shared database, WITHOUT --with-samples. It creates the named campus and seven accounts initially using sos2026, with no classes, students or financial records. Keep the resulting private credential file securely. The generated accounts are initial installation accounts; staff identity, distribution, reset and recovery procedures need to be agreed before live operation.
+Run npm run bootstrap:school against the new empty shared database, WITHOUT --with-samples. It creates the named campus and six accounts initially using sos2026, with no classes, students or financial records. Keep the resulting private credential file securely. The generated accounts are initial installation accounts; staff identity, distribution, reset and recovery procedures need to be agreed before live operation.
 
 Run npm run migrate:erp explicitly before starting an upgraded installation. The current additive schema installation is transactional and repeatable and records schema versions 1 and 2. Existing credentials and records are preserved. Future schema changes require explicit versioned migrations and tested rollback/recovery. Do not seed an upgraded database. The old seed:erp script remains a legacy fictional test fixture command and must not be used for this campus.
 
@@ -75,7 +75,7 @@ For an already configured School of Scholars database, set its ERP_DB_PATH or Tu
 
 ## Deployment startup
 
-start:erp now checks the configured database before accepting traffic, applies the additive schema, and bootstraps seven initial accounts only when the database is empty. New account passwords are sos2026 as requested. Existing passwords and records are retained. It refuses a database already containing another school's campus code. A populated database still needs reset:passwords if you intend to reset its existing passwords. Invalid Turso credentials or an unavailable database cause startup to fail instead of serving a working sign-in screen backed by a broken database.
+start:erp now checks the configured database before accepting traffic, applies the additive schema, and bootstraps six initial accounts only when the database is empty. New account passwords are sos2026 as requested. Existing passwords and records are retained. It refuses a database already containing another school's campus code. A populated database still needs reset:passwords if you intend to reset its existing passwords. Invalid Turso credentials or an unavailable database cause startup to fail instead of serving a working sign-in screen backed by a broken database.
 
 ## Single-school installation
 
@@ -83,8 +83,12 @@ This product serves School of Scholars, Kolambi, Katol only. School creation is 
 
 ## App links
 
-Use /erp for administration, faculty, office, principal and management; /parent-app for parents; and /staff-app for campus staff. Each page has its own sign-in context and shares server-side authentication and records. Signing in or opening a link with an existing session directs the user to their role's canonical app. The API continues to enforce record permissions on every request. These apps share the same browser session cookie; use separate browser profiles when testing multiple roles simultaneously.
+Use /erp for administrators, /faculty-app for faculty, /office-app for the office, /principal-app for principals, /parent-app for parents, and /staff-app for staff. Each page has its own sign-in context and shares server-side authentication and records. Signing in or opening a link with an existing session directs the user to their role's canonical app. The API continues to enforce record permissions on every request. These apps share the same browser session cookie; use separate browser profiles when testing multiple roles simultaneously.
 
 ## Additional role entry links
 
-Faculty use /faculty-app, principals use /principal-app, school office use /office-app, and management use /management-app. Administrator access remains /erp; parent and staff retain their dedicated paths. Existing class/date links through /erp retain their query when routed to the signed-in user's app. These links open currently implemented role workflows. Dedicated student, Accounts, Library, Transport and HR/payroll apps require further implementation and confirmed permissions.
+Faculty use /faculty-app, principals use /principal-app, school office use /office-app, and administrators use /erp. Administrator access remains /erp; parent and staff retain their dedicated paths. Existing class/date links through /erp retain their query when routed to the signed-in user's app. These links open currently implemented role workflows. Dedicated student, Accounts, Library, Transport and HR/payroll apps require further implementation and confirmed permissions.
+
+## Removed Management app
+
+The Management app route and new Management account have been removed. Legacy management/commissioner accounts in the Katol database are denied sign-in and their existing sessions are rejected. Historical account rows are retained to preserve audit references. Active apps are ERP, Faculty, Principal, School Office, Parent and Staff.

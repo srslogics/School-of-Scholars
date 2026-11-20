@@ -12,7 +12,6 @@ export const campusAccounts: [string, string, Role][] = [
   ['teacher', 'Class Teacher', 'teacher'],
   ['parent', 'Parent / Guardian', 'parent'],
   ['staff', 'Campus Staff', 'staff'],
-  ['management', 'School Management', 'commissioner'],
 ];
 
 export async function bootstrapCampus(

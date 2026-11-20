@@ -913,3 +913,122 @@ void test('administrator setup submenus select a single area without duplicate s
     globalThis.fetch = original;
   }
 });
+
+void test('review history includes completed requests even when the review queue defaults to pending', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      children: [],
+      schools: [{ id: 'school', code: 'SOS-KATOL', name: 'School' }],
+      canReview: true,
+      requests: [
+        {
+          id: 'r',
+          schoolId: 'school',
+          studentId: null,
+          studentName: null,
+          accountId: 'staff',
+          owner: 'Staff',
+          kind: 'leave',
+          requestedOn: '2026-11-20',
+          message: 'Completed request',
+          status: 'approved',
+          createdAt: '2026-11-20T10:00:00Z',
+        },
+      ],
+      history: [
+        {
+          requestId: 'r',
+          actor: 'Principal',
+          action: 'approved',
+          note: 'Approved leave',
+          at: '2026-11-20T11:00:00Z',
+        },
+      ],
+    });
+  try {
+    const props = {
+      account: {
+        id: 'principal',
+        username: 'principal',
+        name: 'Principal',
+        role: 'principal' as const,
+      },
+      date: '2026-11-20',
+      hideNavigation: true,
+    };
+    const panel = render(<PortalPanel {...props} />);
+    await screen.findByText('No requests in this view.');
+    panel.rerender(<PortalPanel {...props} historyOnly />);
+    assert.ok(screen.getByRole('button', { name: /Leave · 2026-11-20/ }));
+    assert.equal(
+      screen.getByText('View history').closest('details')!.open,
+      true,
+    );
+    assert.ok(screen.getByText('Approved leave'));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('request save succeeds without requiring a second read after the server commits', async () => {
+  const original = globalThis.fetch;
+  let reads = 0;
+  const data = {
+    date: '2026-11-20',
+    children: [],
+    schools: [{ id: 'school', code: 'SOS-KATOL', name: 'School' }],
+    requests: [],
+    history: [],
+    canReview: false,
+  };
+  globalThis.fetch = async (_url, options) => {
+    if (options?.method === 'POST') return Response.json(data);
+    reads++;
+    if (reads > 1) throw Error('Read service unavailable');
+    return Response.json(data);
+  };
+  try {
+    render(
+      <PortalPanel
+        account={{
+          id: 'staff',
+          username: 'staff',
+          name: 'Staff',
+          role: 'staff',
+        }}
+        date="2026-11-20"
+      />,
+    );
+    await screen.findByText('Submit a request');
+    const field = screen.getByLabelText('Details');
+    fireEvent.change(field, { target: { value: 'Repair desk' } });
+    fireEvent.submit(field.closest('form')!);
+    await screen.findByText('Request submitted to the school.');
+    assert.equal(reads, 1);
+    assert.equal(screen.queryByRole('alert'), null);
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('HTML infrastructure errors produce readable retry feedback', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response('<html>Gateway unavailable</html>', {
+      status: 502,
+      headers: { 'content-type': 'text/html' },
+    });
+  try {
+    render(<FeesPanel date="2026-11-20" />);
+    const alert = await screen.findByRole('alert');
+    assert.ok(alert.textContent?.includes('Please try again'));
+    assert.ok(screen.getByRole('button', { name: 'Try again' }));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

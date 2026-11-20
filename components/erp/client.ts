@@ -23,7 +23,15 @@ export async function request<T>(
           body: JSON.stringify(payload),
         }),
   });
-  const data = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new RequestError(
+      response.status,
+      'The server returned an unreadable response. Please try again.',
+    );
+  }
   if (!response.ok) {
     const message =
       typeof data === 'object' &&

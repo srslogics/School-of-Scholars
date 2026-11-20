@@ -55,6 +55,7 @@ export function FeesPanel({
     action: 'charge' | 'payment',
   ) {
     event.preventDefault();
+    if (busy) return;
     const form = event.currentTarget;
     const values = Object.fromEntries(new FormData(form));
     const text = typeof values.amount === 'string' ? values.amount : '';

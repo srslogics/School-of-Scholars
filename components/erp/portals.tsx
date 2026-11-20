@@ -49,6 +49,8 @@ export function PortalPanel({
       : 'all',
   );
   const [selectedRequestId, setSelectedRequestId] = useState('');
+  const [historyFilter, setHistoryFilter] = useState('all');
+  const activeFilter = historyOnly ? historyFilter : requestFilter;
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -85,8 +87,13 @@ export function PortalPanel({
     setError('');
     setMessage('');
     try {
-      await request('portal', { ...values, action, requestId });
-      setView(await request<View>('portal?date=' + selectedDate));
+      const saved = await request<View>('portal', {
+        ...values,
+        action,
+        requestId,
+      });
+      setView(saved);
+      setSelectedDate(saved.date);
       if (action === 'submit') setRequestId(crypto.randomUUID());
       form.reset();
       if (action === 'submit' && account.role === 'parent')
@@ -105,7 +112,7 @@ export function PortalPanel({
   const parent = account.role === 'parent';
   const visibleRequests =
     view?.requests.filter(
-      (r) => requestFilter === 'all' || r.status === requestFilter,
+      (r) => activeFilter === 'all' || r.status === activeFilter,
     ) ?? [];
   const selectedRequest =
     visibleRequests.find((r) => r.id === selectedRequestId) ??
@@ -342,9 +349,13 @@ export function PortalPanel({
               <label>
                 Request status
                 <select
-                  value={requestFilter}
+                  value={activeFilter}
                   disabled={busy}
-                  onChange={(e) => setRequestFilter(e.target.value)}
+                  onChange={(e) =>
+                    historyOnly
+                      ? setHistoryFilter(e.target.value)
+                      : setRequestFilter(e.target.value)
+                  }
                 >
                   <option value="all">All requests</option>
                   <option value="submitted">Awaiting decision</option>

@@ -27,6 +27,7 @@ export function AdmissionsPanel({
   }, []);
   async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     const form = event.currentTarget;
     const values = Object.fromEntries(new FormData(form));
     setBusy(true);

@@ -1454,3 +1454,28 @@ output.erp-login {
     padding: 20px;
   }
 }
+.erp-parent-modules {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.erp-shell .erp-parent-modules button {
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 7px 12px;
+}
+.erp-shell .erp-parent-modules [aria-current='page'] {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: white;
+}
+.erp-portal .erp-child-card .erp-child-summary {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 480px) {
+  .erp-parent-modules {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

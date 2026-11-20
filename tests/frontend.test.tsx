@@ -578,3 +578,121 @@ void test('empty staff requests have one empty-state line without an empty detai
     globalThis.fetch = original;
   }
 });
+
+void test('parent modules remain discoverable without a link and become functional after linking', async () => {
+  const original = globalThis.fetch;
+  const parent = {
+    id: 'parent',
+    username: 'parent',
+    name: 'Guardian',
+    role: 'parent' as const,
+  };
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      schools: [],
+      requests: [],
+      history: [],
+      children: [],
+      canReview: false,
+    });
+  try {
+    render(<PortalPanel account={parent} date="2026-11-20" />);
+    await screen.findByRole('heading', { name: 'No child linked' });
+    for (const name of [
+      'Attendance',
+      'Fees',
+      'Receipts',
+      'Leave',
+      'Requests',
+      'History',
+    ])
+      assert.ok(screen.getByRole('button', { name }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fees' }));
+    assert.ok(screen.getByRole('heading', { name: 'No child linked' }));
+    cleanup();
+    const data = {
+      date: '2026-11-20',
+      schools: [],
+      canReview: false,
+      children: [
+        {
+          id: 'child',
+          name: 'Linked Child',
+          roll: '1',
+          schoolId: 'school',
+          school: 'School of Scholars',
+          className: '5 · A',
+          attendance: { mark: 'present', status: 'submitted' },
+          charges: [
+            {
+              id: 'fee',
+              description: 'Tuition',
+              amount: 100000,
+              paid: 25000,
+              dueOn: '2026-12-01',
+            },
+          ],
+          receipts: [
+            { id: 'R-001', amount: 25000, paidOn: '2026-11-20', mode: 'cash' },
+          ],
+        },
+      ],
+      requests: [
+        {
+          id: 'leave',
+          schoolId: 'school',
+          studentId: 'child',
+          studentName: 'Linked Child',
+          kind: 'leave',
+          requestedOn: '2026-11-20',
+          message: 'Family appointment',
+          status: 'submitted',
+          createdAt: '2026-11-20T10:00:00Z',
+          owner: 'Guardian',
+          accountId: 'parent',
+        },
+      ],
+      history: [
+        {
+          requestId: 'leave',
+          actor: 'Guardian',
+          action: 'submitted',
+          note: 'Family appointment',
+          at: '2026-11-20T10:00:00Z',
+        },
+      ],
+    };
+    let submitted: Record<string, unknown> | undefined;
+    globalThis.fetch = async (_url, options) => {
+      if (options?.method === 'POST')
+        submitted = JSON.parse(
+          typeof options.body === 'string' ? options.body : '{}',
+        ) as Record<string, unknown>;
+      return Response.json(data);
+    };
+    render(<PortalPanel account={parent} date="2026-11-20" />);
+    await screen.findByRole('heading', { name: 'Linked Child' });
+    assert.ok(screen.getByText('Present'));
+    fireEvent.click(screen.getByRole('button', { name: 'Fees' }));
+    assert.ok(screen.getByRole('heading', { level: 2, name: 'Fees' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Receipts' }));
+    assert.ok(screen.getByRole('heading', { level: 2, name: 'Receipts' }));
+    assert.ok(screen.getByText('R-001'));
+    fireEvent.click(screen.getByRole('button', { name: 'Leave' }));
+    const details = screen.getByLabelText('Details');
+    fireEvent.change(details, { target: { value: 'Family appointment' } });
+    fireEvent.submit(details.closest('form')!);
+    await screen.findByText('Request submitted to the school.');
+    assert.equal(submitted?.studentId, 'child');
+    assert.ok(screen.getByRole('heading', { level: 2, name: 'Requests' }));
+    fireEvent.click(screen.getByRole('button', { name: 'History' }));
+    assert.equal(
+      screen.getByText('View history').closest('details')!.open,
+      true,
+    );
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

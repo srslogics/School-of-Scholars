@@ -15,8 +15,8 @@ const hashToken = (token: string) =>
 const dummyHash = '00000000000000000000000000000000:' + '0'.repeat(128);
 
 export function passwordHash(password: string) {
-  if (password.length < 12 || password.length > 128)
-    throw new ErpError(400, 'Use a password of 12 to 128 characters.');
+  if (password.length < 7 || password.length > 128)
+    throw new ErpError(400, 'Use a password of 7 to 128 characters.');
   const salt = randomBytes(16).toString('hex');
   return salt + ':' + scryptSync(password, salt, 64).toString('hex');
 }

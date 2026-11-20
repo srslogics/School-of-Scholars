@@ -19,7 +19,8 @@
     "start:erp": "ERP_RUNTIME=node vinext start",
     "seed:erp": "tsx scripts/seed-erp.ts",
     "bootstrap:school": "tsx scripts/bootstrap-campus.ts",
-    "migrate:erp": "tsx scripts/migrate-erp.ts"
+    "migrate:erp": "tsx scripts/migrate-erp.ts",
+    "reset:passwords": "tsx scripts/reset-passwords.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

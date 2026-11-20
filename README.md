@@ -13,7 +13,7 @@ Use Node 22.13+ within Node 22. Run:
     npm run build:erp
     npm run start:erp -- --hostname 127.0.0.1 --port 3010
 
-Bootstrap runs only once on an empty dedicated database. The sample option is restricted to local files. Passwords are randomly generated into the owner-only file .erp-data/katol-development.sqlite.accounts.json. They must not be committed or shared publicly.
+Bootstrap runs only once on an empty dedicated database. The sample option is restricted to local files. Initial passwords are sos2026 as requested. Account details are saved into the owner-only file .erp-data/katol-development.sqlite.accounts.json. They must not be committed or shared publicly.
 
 Open /erp. Account usernames are admin, principal, office, teacher, parent, staff and management. The local sample includes one Katol campus, one fictional class and one fictional student. Administrator setup configures approved classes and staff. Principal and office users enrol students and record charges/payments. Teachers access assigned attendance rosters. Management currently sees attendance summaries.
 
@@ -23,7 +23,7 @@ Internal database role identifiers officer and commissioner are retained for com
 
 Use a separate Turso libSQL database and a separate Render Node web service for this school. Configure TURSO_DATABASE_URL, TURSO_AUTH_TOKEN and the public HTTPS origin (ERP_ORIGIN, or Render's RENDER_EXTERNAL_URL). No local disk is required for hosted persistence. Never reuse the NMC database or deployment.
 
-Run npm run bootstrap:school against the new empty shared database, WITHOUT --with-samples. It creates the named campus and seven individually credentialed accounts, with no classes, students or financial records. Keep the resulting private credential file securely. The generated accounts are initial installation accounts; staff identity, distribution, reset and recovery procedures need to be agreed before live operation.
+Run npm run bootstrap:school against the new empty shared database, WITHOUT --with-samples. It creates the named campus and seven accounts initially using sos2026, with no classes, students or financial records. Keep the resulting private credential file securely. The generated accounts are initial installation accounts; staff identity, distribution, reset and recovery procedures need to be agreed before live operation.
 
 Run npm run migrate:erp explicitly before starting an upgraded installation. The current additive schema installation is transactional and repeatable and records schema versions 1 and 2. Existing credentials and records are preserved. Future schema changes require explicit versioned migrations and tested rollback/recovery. Do not seed an upgraded database. The old seed:erp script remains a legacy fictional test fixture command and must not be used for this campus.
 
@@ -66,3 +66,9 @@ School setup can create parent and staff accounts. Assign staff to a school, and
 Schema version 2 adds portal profiles, guardian links and request/event tables without rewriting the existing account table. The profile overrides the inherited storage role during server authentication. Parent/staff base account rows retain the legacy teacher storage value, but their effective roles are parent/staff and the class-assignment API rejects assigning a parent as faculty. All application permissions must use the authenticated effective role. This compatibility detail is internal.
 
 These are the first operational web app workflows. Native mobile packages, push notifications, parent online payments, timetables, homework, published assessments, leave balances, staff payslips and task allocation remain future implementation. Student, Accounts, admissions, librarian, transport and HR/payroll workspaces need their own confirmed permissions and workflows before delivery.
+
+## Shared initial password
+
+All newly bootstrapped campus accounts use sos2026, as explicitly requested. The account form defaults new users to the same password. Passwords remain individually salted and hashed in the database. The minimum accepted password length is now seven characters. This shared password is temporary and should be replaced before handling real school records.
+
+For an already configured School of Scholars database, set its ERP_DB_PATH or Turso variables and run npm run reset:passwords. This explicitly resets ALL accounts in that database to sos2026 and invalidates existing sessions and login limits. It requires the SOS-KATOL campus code to guard against targeting the inherited NMC database. Run it only when intending to reset all users. Local account files, if present, are updated to match. Re-deploying application code alone does not reset existing database passwords.

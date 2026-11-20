@@ -201,9 +201,10 @@ export function SetupPanel({
               name="password"
               type="password"
               required
-              minLength={12}
+              minLength={7}
               maxLength={128}
               autoComplete="new-password"
+              defaultValue="sos2026"
             />
           </label>
           <label>

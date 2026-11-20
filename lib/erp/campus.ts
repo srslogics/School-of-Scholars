@@ -3,6 +3,8 @@ import { passwordHash } from './auth';
 import { one, run, write, type Database } from './database';
 import { todayInNagpur, type Role } from './model';
 
+export const initialCampusPassword = 'sos2026';
+
 export const campusAccounts: [string, string, Role][] = [
   ['admin', 'School Administrator', 'administrator'],
   ['principal', 'Principal', 'principal'],

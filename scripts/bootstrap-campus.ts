@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import {
@@ -6,7 +5,11 @@ import {
   initializeDatabase,
   one,
 } from '../lib/erp/database';
-import { bootstrapCampus, campusAccounts } from '../lib/erp/campus';
+import {
+  bootstrapCampus,
+  campusAccounts,
+  initialCampusPassword,
+} from '../lib/erp/campus';
 
 const sample = process.argv.includes('--with-samples');
 if (sample && (process.env.TURSO_DATABASE_URL || process.env.RENDER === 'true'))
@@ -30,7 +33,7 @@ try {
   const accounts = campusAccounts.map(([username, , role]) => ({
     username,
     role,
-    password: randomBytes(24).toString('base64url'),
+    password: initialCampusPassword,
   }));
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
   writeFileSync(file, JSON.stringify(accounts, null, 2) + '\n', {

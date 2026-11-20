@@ -12,19 +12,27 @@ export function SetupPanel({
   date,
   onSaved,
   onOpenAdmissions,
+  selectedArea,
+  onAreaChange,
 }: {
   date: string;
   onSaved: () => void;
   onOpenAdmissions?: () => void;
+  selectedArea?: 'classes' | 'users' | 'assignments' | 'guardians';
+  onAreaChange?: (
+    area: 'classes' | 'users' | 'assignments' | 'guardians',
+  ) => void;
 }) {
   const [setup, setSetup] = useState<Setup>();
   const [staffId, setStaffId] = useState('');
-  const [area, setArea] = useState<
+  const [localArea, setArea] = useState<
     'classes' | 'users' | 'assignments' | 'guardians'
   >('classes');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [reload, setReload] = useState(0);
+  const area = selectedArea ?? localArea;
   useEffect(() => {
     const controller = new AbortController();
     request<Setup>('setup', undefined, controller.signal)
@@ -33,7 +41,7 @@ export function SetupPanel({
         if (!controller.signal.aborted) setError(errorMessage(failure));
       });
     return () => controller.abort();
-  }, []);
+  }, [reload]);
 
   async function submit(
     event: ReactSubmitEvent<HTMLFormElement>,
@@ -68,9 +76,18 @@ export function SetupPanel({
 
   if (!setup)
     return error ? (
-      <p role="alert" className="erp-error">
-        {error}
-      </p>
+      <div role="alert" className="erp-error">
+        {error}{' '}
+        <button
+          type="button"
+          onClick={() => {
+            setError('');
+            setReload((r) => r + 1);
+          }}
+        >
+          Try again
+        </button>
+      </div>
     ) : (
       <output>Loading school setup…</output>
     );
@@ -97,23 +114,25 @@ export function SetupPanel({
   };
   return (
     <section className="erp-setup">
-      <nav className="erp-setup-tabs" aria-label="Setup area">
-        {(Object.keys(names) as (keyof typeof names)[]).map((key) => (
-          <button
-            type="button"
-            key={key}
-            disabled={busy}
-            aria-current={area === key ? 'page' : undefined}
-            onClick={() => {
-              setArea(key);
-              setError('');
-              setMessage('');
-            }}
-          >
-            {names[key]}
-          </button>
-        ))}
-      </nav>
+      {!selectedArea && (
+        <nav className="erp-setup-tabs" aria-label="Setup area">
+          {(Object.keys(names) as (keyof typeof names)[]).map((key) => (
+            <button
+              type="button"
+              key={key}
+              disabled={busy}
+              aria-current={area === key ? 'page' : undefined}
+              onClick={() => {
+                setArea(key);
+                setError('');
+                setMessage('');
+              }}
+            >
+              {names[key]}
+            </button>
+          ))}
+        </nav>
+      )}
       {error && (
         <p role="alert" className="erp-error">
           {error}
@@ -223,6 +242,7 @@ export function SetupPanel({
                               onClick={() => {
                                 setStaffId(person.id);
                                 setArea('assignments');
+                                onAreaChange?.('assignments');
                               }}
                             >
                               Manage access
@@ -231,7 +251,10 @@ export function SetupPanel({
                             <button
                               type="button"
                               aria-label={'Guardian links for ' + person.name}
-                              onClick={() => setArea('guardians')}
+                              onClick={() => {
+                                setArea('guardians');
+                                onAreaChange?.('guardians');
+                              }}
                             >
                               Guardian links
                             </button>

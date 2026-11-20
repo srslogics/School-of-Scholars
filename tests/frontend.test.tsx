@@ -838,3 +838,78 @@ void test('parent sidebar groups expose child modules and notices without duplic
     globalThis.fetch = original;
   }
 });
+
+void test('office finance sidebar selections show one task without repeated top tabs', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => Response.json(view);
+  try {
+    const result = render(
+      <FeesPanel date="2026-11-20" selectedArea="receipts" />,
+    );
+    await screen.findByRole('region', { name: 'Collection receipts' });
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Fee ledger' }),
+      null,
+    );
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Fee transaction type' }),
+      null,
+    );
+    assert.equal(
+      screen.queryByRole('button', { name: 'Record payment' }),
+      null,
+    );
+    result.rerender(<FeesPanel date="2026-11-20" selectedArea="payment" />);
+    assert.ok(screen.getByRole('button', { name: 'Record payment' }));
+    assert.equal(screen.queryByRole('button', { name: 'Save charge' }), null);
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('administrator setup submenus select a single area without duplicate setup navigation', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      schools: [
+        { id: 'school', code: 'SOS-KATOL', name: 'School of Scholars' },
+      ],
+      classes: [],
+      staff: [],
+      enrolments: [],
+      guardians: [],
+      assignments: [],
+    });
+  try {
+    const result = render(
+      <SetupPanel date="2026-11-20" onSaved={() => {}} selectedArea="users" />,
+    );
+    await screen.findByRole('heading', { name: 'Create a user account' });
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Setup area' }),
+      null,
+    );
+    assert.equal(
+      screen.queryByRole('heading', { name: 'Add class and section' }),
+      null,
+    );
+    result.rerender(
+      <SetupPanel
+        date="2026-11-20"
+        onSaved={() => {}}
+        selectedArea="guardians"
+      />,
+    );
+    assert.ok(
+      screen.getByRole('heading', { name: 'Parent access to a child' }),
+    );
+    assert.equal(
+      screen.queryByRole('heading', { name: 'Create a user account' }),
+      null,
+    );
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

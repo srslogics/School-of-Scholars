@@ -1568,3 +1568,6 @@ output.erp-login {
     min-height: 44px;
   }
 }
+.erp-finance-workbench[data-reader-only='true'] {
+  grid-template-columns: minmax(0, 1fr);
+}

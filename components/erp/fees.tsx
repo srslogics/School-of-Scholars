@@ -11,9 +11,11 @@ const inr = (paise: number) =>
 export function FeesPanel({
   date,
   initialStudentId,
+  selectedArea,
 }: {
   date: string;
   initialStudentId?: string;
+  selectedArea?: 'balances' | 'receipts' | 'payment' | 'charge';
 }) {
   const [studentId, setStudentId] = useState(initialStudentId ?? '');
   const [reload, setReload] = useState(0);
@@ -22,10 +24,25 @@ export function FeesPanel({
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [mode, setMode] = useState('cash');
-  const [entryMode, setEntryMode] = useState<'charge' | 'payment'>('payment');
-  const [ledgerTab, setLedgerTab] = useState<'balances' | 'receipts'>(
+  const [localEntryMode, setEntryMode] = useState<'charge' | 'payment'>(
+    'payment',
+  );
+  const [localLedgerTab, setLedgerTab] = useState<'balances' | 'receipts'>(
     'balances',
   );
+  const entryMode =
+    selectedArea === 'charge'
+      ? 'charge'
+      : selectedArea === 'payment'
+        ? 'payment'
+        : localEntryMode;
+  const ledgerTab =
+    selectedArea === 'receipts'
+      ? 'receipts'
+      : selectedArea
+        ? 'balances'
+        : localLedgerTab;
+  const readerOnly = selectedArea === 'balances' || selectedArea === 'receipts';
   const [chargeKey, setChargeKey] = useState(() => crypto.randomUUID());
   const [paymentKey, setPaymentKey] = useState(() => crypto.randomUUID());
   useEffect(() => {
@@ -110,7 +127,7 @@ export function FeesPanel({
     <section className="erp-finance">
       <div className="erp-card-title">
         <div>
-          <h2>Student fee ledger</h2>
+          {!selectedArea && <h2>Student fee ledger</h2>}
           <p>
             Select a student to see charges, payments and the outstanding
             balance.
@@ -152,24 +169,26 @@ export function FeesPanel({
           <dd>{inr(total - paid)}</dd>
         </div>
       </dl>
-      <div className="erp-finance-workbench">
+      <div className="erp-finance-workbench" data-reader-only={readerOnly}>
         <div className="erp-finance-ledger">
-          <nav className="erp-setup-tabs" aria-label="Fee ledger">
-            <button
-              type="button"
-              aria-current={ledgerTab === 'balances' ? 'page' : undefined}
-              onClick={() => setLedgerTab('balances')}
-            >
-              Balances
-            </button>
-            <button
-              type="button"
-              aria-current={ledgerTab === 'receipts' ? 'page' : undefined}
-              onClick={() => setLedgerTab('receipts')}
-            >
-              Receipts
-            </button>
-          </nav>
+          {!selectedArea && (
+            <nav className="erp-setup-tabs" aria-label="Fee ledger">
+              <button
+                type="button"
+                aria-current={ledgerTab === 'balances' ? 'page' : undefined}
+                onClick={() => setLedgerTab('balances')}
+              >
+                Balances
+              </button>
+              <button
+                type="button"
+                aria-current={ledgerTab === 'receipts' ? 'page' : undefined}
+                onClick={() => setLedgerTab('receipts')}
+              >
+                Receipts
+              </button>
+            </nav>
+          )}
           <div hidden={ledgerTab !== 'balances'}>
             <h3 className="erp-history">Student fee balances</h3>
             <section
@@ -271,25 +290,31 @@ export function FeesPanel({
             </section>
           </div>
         </div>
-        <aside className="erp-finance-editor" aria-label="Fee transaction">
-          <nav className="erp-setup-tabs" aria-label="Fee transaction type">
-            <button
-              type="button"
-              disabled={busy}
-              aria-current={entryMode === 'payment' ? 'page' : undefined}
-              onClick={() => setEntryMode('payment')}
-            >
-              Collect payment
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              aria-current={entryMode === 'charge' ? 'page' : undefined}
-              onClick={() => setEntryMode('charge')}
-            >
-              Add charge
-            </button>
-          </nav>
+        <aside
+          hidden={readerOnly}
+          className="erp-finance-editor"
+          aria-label="Fee transaction"
+        >
+          {!selectedArea && (
+            <nav className="erp-setup-tabs" aria-label="Fee transaction type">
+              <button
+                type="button"
+                disabled={busy}
+                aria-current={entryMode === 'payment' ? 'page' : undefined}
+                onClick={() => setEntryMode('payment')}
+              >
+                Collect payment
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                aria-current={entryMode === 'charge' ? 'page' : undefined}
+                onClick={() => setEntryMode('charge')}
+              >
+                Add charge
+              </button>
+            </nav>
+          )}
           <div className="erp-finance-forms">
             <div hidden={entryMode !== 'charge'} className="erp-finance-entry">
               <h3>Add a fee charge</h3>

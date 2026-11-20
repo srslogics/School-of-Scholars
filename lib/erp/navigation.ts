@@ -63,7 +63,12 @@ export function appNavigation(role: Role): NavigationGroup[] {
   if (role === 'administrator')
     groups.push({
       label: 'Administration',
-      items: [{ id: 'setup', label: 'Classes & access' }],
+      items: [
+        { id: 'setup:classes', label: 'Classes & sections' },
+        { id: 'setup:users', label: 'User accounts' },
+        { id: 'setup:assignments', label: 'Staff access' },
+        { id: 'setup:guardians', label: 'Guardian links' },
+      ],
     });
   if (['administrator', 'principal', 'officer'].includes(role)) {
     groups.push({
@@ -72,7 +77,12 @@ export function appNavigation(role: Role): NavigationGroup[] {
     });
     groups.push({
       label: 'Finance',
-      items: [{ id: 'fees', label: 'Fees & collections' }],
+      items: [
+        { id: 'fees:balances', label: 'Student balances' },
+        { id: 'fees:receipts', label: 'Receipts' },
+        { id: 'fees:payment', label: 'Collect payment' },
+        { id: 'fees:charge', label: 'Add charge' },
+      ],
     });
   }
   if (['teacher', 'principal'].includes(role))
@@ -98,12 +108,16 @@ export function appNavigation(role: Role): NavigationGroup[] {
   if (['administrator', 'principal', 'teacher'].includes(role))
     groups.push({
       label: 'Requests',
-      items: [
-        {
-          id: 'requests',
-          label: role === 'teacher' ? 'My requests' : 'School requests',
-        },
-      ],
+      items:
+        role === 'teacher'
+          ? [
+              { id: 'requests', label: 'My requests' },
+              { id: 'requests:history', label: 'Request history' },
+            ]
+          : [
+              { id: 'requests', label: 'School requests' },
+              { id: 'requests:history', label: 'Decision history' },
+            ],
     });
   groups.push({
     label: 'Communication',

@@ -266,15 +266,20 @@ function SignedWorkspace({
   const [feeStudentId, setFeeStudentId] = useState<string>();
   const [classId, setClassId] = useState(allowedInitial?.id ?? '');
   const [date, setDate] = useState(initial.date ?? workspace.date);
-  const [tab, setTab] = useState(
+  const [selected, setTab] = useState(
     account.role === 'administrator'
-      ? 'setup'
+      ? 'setup:classes'
       : account.role === 'officer'
         ? 'admissions'
         : account.role === 'teacher' || allowedInitial
           ? 'register'
           : 'report',
   );
+  const tab = selected.split(':')[0];
+  const submodule = selected.split(':')[1];
+  const selectedLabel = appNavigation(account.role)
+    .flatMap((g) => g.items)
+    .find((i) => i.id === selected)?.label;
   const scopedClasses = classes.filter((row) => row.schoolId === schoolId);
   const selectedClass =
     scopedClasses.find((row) => row.id === classId) ?? scopedClasses[0];
@@ -291,10 +296,10 @@ function SignedWorkspace({
     <div className="erp-layout">
       <AppSidebar
         groups={appNavigation(account.role)}
-        selected={tab}
+        selected={selected}
         onSelect={(id) => {
           setBadLink(false);
-          if (id === 'fees') setFeeStudentId(undefined);
+          if (id.startsWith('fees:')) setFeeStudentId(undefined);
           setTab(id);
         }}
       />
@@ -306,33 +311,34 @@ function SignedWorkspace({
             {roleLabel[account.role]}
           </p>
           <h1>
-            {[
-              'timetable',
-              'homework',
-              'exams',
-              'reports',
-              'communication',
-            ].includes(tab)
-              ? ({
-                  timetable: 'Timetable',
-                  homework: 'Homework',
-                  exams: 'Examinations',
-                  reports: 'Report cards',
-                  communication: 'Communication',
-                }[tab] ?? 'Academics')
-              : tab === 'requests'
-                ? account.role === 'teacher'
-                  ? 'Faculty requests'
-                  : 'School requests'
-                : tab === 'fees'
-                  ? 'Fees & collections'
-                  : tab === 'admissions'
-                    ? 'Admissions & students'
-                    : tab === 'setup'
-                      ? 'School setup'
-                      : tab === 'report'
-                        ? 'Attendance overview'
-                        : 'Class register'}
+            {selectedLabel ??
+              ([
+                'timetable',
+                'homework',
+                'exams',
+                'reports',
+                'communication',
+              ].includes(tab)
+                ? ({
+                    timetable: 'Timetable',
+                    homework: 'Homework',
+                    exams: 'Examinations',
+                    reports: 'Report cards',
+                    communication: 'Communication',
+                  }[tab] ?? 'Academics')
+                : tab === 'requests'
+                  ? account.role === 'teacher'
+                    ? 'Faculty requests'
+                    : 'School requests'
+                  : tab === 'fees'
+                    ? 'Fees & collections'
+                    : tab === 'admissions'
+                      ? 'Admissions & students'
+                      : tab === 'setup'
+                        ? 'School setup'
+                        : tab === 'report'
+                          ? 'Attendance overview'
+                          : 'Class register')}
           </h1>
           <p>
             {[
@@ -411,12 +417,25 @@ function SignedWorkspace({
             embedded
           />
         ) : tab === 'requests' ? (
-          <PortalPanel account={account} date={workspace.date} />
+          <PortalPanel
+            account={account}
+            date={workspace.date}
+            hideNavigation
+            historyOnly={submodule === 'history'}
+          />
         ) : tab === 'fees' ? (
           <FeesPanel
             key={feeStudentId ?? 'all'}
             date={workspace.date}
             initialStudentId={feeStudentId}
+            selectedArea={
+              submodule as
+                | 'balances'
+                | 'receipts'
+                | 'payment'
+                | 'charge'
+                | undefined
+            }
           />
         ) : tab === 'admissions' ? (
           <AdmissionsPanel
@@ -424,7 +443,7 @@ function SignedWorkspace({
             onSaved={refresh}
             onOpenFees={(id) => {
               setFeeStudentId(id);
-              setTab('fees');
+              setTab('fees:balances');
             }}
           />
         ) : tab === 'setup' ? (
@@ -432,6 +451,15 @@ function SignedWorkspace({
             date={workspace.date}
             onSaved={refresh}
             onOpenAdmissions={() => setTab('admissions')}
+            selectedArea={
+              submodule as
+                | 'classes'
+                | 'users'
+                | 'assignments'
+                | 'guardians'
+                | undefined
+            }
+            onAreaChange={(area) => setTab('setup:' + area)}
           />
         ) : tab === 'report' ? (
           <ReportPanel

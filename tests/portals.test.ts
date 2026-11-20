@@ -1,3 +1,4 @@
+import { workspacePath } from '../lib/erp/model';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -274,6 +275,11 @@ void test('parent, faculty and staff portals enforce links, isolation, review hi
       ((await session.json()) as { account: Account }).account.role,
       'parent',
     );
+    assert.equal(workspacePath('parent'), '/parent-app');
+    assert.equal(workspacePath('staff'), '/staff-app');
+    assert.equal(workspacePath('teacher'), '/erp');
+    assert.equal(workspacePath('administrator'), '/erp');
+
     const staffCookie = await signed('staff');
     assert.equal(
       (

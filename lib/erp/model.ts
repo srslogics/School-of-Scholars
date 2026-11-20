@@ -101,3 +101,11 @@ export function attendanceRate(counts: Counts) {
     ? `${((100 * counts.present) / counts.total).toFixed(1)}%`
     : '—';
 }
+
+export type WorkspacePath = '/erp' | '/parent-app' | '/staff-app';
+
+export function workspacePath(role: Role): WorkspacePath {
+  if (role === 'parent') return '/parent-app';
+  if (role === 'staff') return '/staff-app';
+  return '/erp';
+}

@@ -18,7 +18,11 @@ import {
   useState,
   type SubmitEvent as ReactSubmitEvent,
 } from 'react';
-import type { Workspace } from '@/lib/erp/model';
+import {
+  workspacePath,
+  type Workspace,
+  type WorkspacePath,
+} from '@/lib/erp/model';
 import { RegisterPanel, ReportPanel } from './attendance';
 import { SetupPanel } from './setup';
 import { errorMessage, request, RequestError } from './client';
@@ -34,18 +38,36 @@ const roleLabel = {
   commissioner: 'Management',
 };
 
-export function ErpWorkspace({ initial }: { initial: Initial }) {
+export function ErpWorkspace({
+  initial,
+  entryPath = '/erp',
+}: {
+  initial: Initial;
+  entryPath?: WorkspacePath;
+}) {
   const [workspace, setWorkspace] = useState<Workspace>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [unavailable, setUnavailable] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const entryLabel =
+    entryPath === '/parent-app'
+      ? 'Parent app'
+      : entryPath === '/staff-app'
+        ? 'Staff app'
+        : 'School ERP';
 
   useEffect(() => {
     const controller = new AbortController();
     request<Workspace>('session', undefined, controller.signal)
       .then((result) => {
-        if (!controller.signal.aborted) setWorkspace(result);
+        if (!controller.signal.aborted) {
+          if (workspacePath(result.account.role) !== entryPath) {
+            setRedirecting(true);
+            window.location.replace(workspacePath(result.account.role));
+          } else setWorkspace(result);
+        }
       })
       .catch((failure: unknown) => {
         if (
@@ -62,7 +84,7 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, []);
+  }, [entryPath]);
 
   async function signIn(event: ReactSubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,7 +93,11 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
     setError('');
     try {
       await request('login', fields);
-      setWorkspace(await request<Workspace>('session'));
+      const session = await request<Workspace>('session');
+      if (workspacePath(session.account.role) !== entryPath) {
+        setRedirecting(true);
+        window.location.replace(workspacePath(session.account.role));
+      } else setWorkspace(session);
     } catch (failure) {
       setError(errorMessage(failure));
     } finally {
@@ -105,7 +131,7 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
         </div>
         <div>
           <strong>School of Scholars</strong>
-          <p>Kolambi, Katol · School administration</p>
+          <p>Kolambi, Katol · {entryLabel}</p>
         </div>
         <div className="erp-account">
           {workspace && (
@@ -142,8 +168,10 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
       <div className="erp-environment">
         Fictional sample data · School configuration awaiting approval
       </div>
-      {loading ? (
-        <output className="erp-login">Checking your session…</output>
+      {loading || redirecting ? (
+        <output className="erp-login">
+          {redirecting ? 'Opening your workspace…' : 'Checking your session…'}
+        </output>
       ) : workspace ? (
         <>
           {error && (
@@ -185,7 +213,7 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
             id="school-content"
             tabIndex={-1}
           >
-            <span className="scholars-eyebrow">YOUR SCHOOL WORKSPACE</span>
+            <span className="scholars-eyebrow">{entryLabel}</span>
             <h1>Sign in</h1>
             <p>Sign in with your school account to continue.</p>
             {error && (

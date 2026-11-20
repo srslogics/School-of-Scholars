@@ -80,3 +80,7 @@ start:erp now checks the configured database before accepting traffic, applies t
 ## Single-school installation
 
 This product serves School of Scholars, Kolambi, Katol only. School creation is removed from setup and the server rejects creating a second school once the Katol campus exists. Startup refuses a Katol database containing additional school records, preserving them for administrator review. Attendance and personal request screens use the configured school directly. Classes, sections, staff assignments, guardian links and role-specific access remain configurable within that school. Legacy multiple-school fixtures are retained only for permission regression tests.
+
+## App links
+
+Use /erp for administration, faculty, office, principal and management; /parent-app for parents; and /staff-app for campus staff. Each page has its own sign-in context and shares server-side authentication and records. Signing in or opening a link with an existing session directs the user to their role's canonical app. The API continues to enforce record permissions on every request. These apps share the same browser session cookie; use separate browser profiles when testing multiple roles simultaneously.

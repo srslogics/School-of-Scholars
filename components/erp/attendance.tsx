@@ -1,4 +1,5 @@
 'use client';
+/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Keyboard access is needed for the scrollable class register. */
 
 import {
   useEffect,
@@ -61,9 +62,12 @@ export function RegisterPanel({
 
   if (!view)
     return error ? (
-      <p role="alert" className="erp-error">
-        {error}
-      </p>
+      <div role="alert" className="erp-error">
+        {error}{' '}
+        <button type="button" onClick={() => setReload((r) => r + 1)}>
+          Try again
+        </button>
+      </div>
     ) : (
       <output>Loading register…</output>
     );
@@ -108,7 +112,7 @@ export function RegisterPanel({
     }
   }
   return (
-    <section className="erp-card">
+    <section className="erp-attendance-sheet">
       <header className="erp-card-title">
         <div>
           <h2>
@@ -136,9 +140,27 @@ export function RegisterPanel({
           Returned for correction. The reason is in the history below.
         </p>
       )}
+      <div className="erp-register-progress" aria-live="polite">
+        <strong>
+          {Object.keys(values).length} / {view.roster.length} marked
+        </strong>
+        <span>
+          {Object.values(values).filter((m) => m === 'present').length} present
+        </span>
+        <span>
+          {Object.values(values).filter((m) => m === 'absent').length} absent
+        </span>
+        <span>
+          {Object.values(values).filter((m) => m === 'leave').length} on leave
+        </span>
+      </div>
       <form onSubmit={(event) => void save(event)}>
         {view.roster.length ? (
-          <div className="erp-scroll">
+          <section
+            className="erp-scroll"
+            aria-label="Class attendance register"
+            tabIndex={0}
+          >
             <table className="erp-table">
               <thead>
                 <tr>
@@ -185,7 +207,7 @@ export function RegisterPanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </section>
         ) : (
           <p>No students are enrolled for this date.</p>
         )}
@@ -230,8 +252,8 @@ export function RegisterPanel({
           </div>
         )}
       </form>
-      <div className="erp-history">
-        <h3>Register history</h3>
+      <details className="erp-history">
+        <summary>Register history ({view.history.length})</summary>
         {view.history.length ? (
           <ol>
             {view.history.map((event, index) => (
@@ -254,7 +276,7 @@ export function RegisterPanel({
         ) : (
           <p>No submissions recorded.</p>
         )}
-      </div>
+      </details>
     </section>
   );
 }
@@ -305,22 +327,23 @@ export function ReportPanel({
   }, [query, reload]);
   if (!report)
     return error ? (
-      <p role="alert" className="erp-error">
-        {error}
-      </p>
+      <div role="alert" className="erp-error">
+        {error}{' '}
+        <button type="button" onClick={() => setReload((r) => r + 1)}>
+          Try again
+        </button>
+      </div>
     ) : (
       <output>Loading attendance summary…</output>
     );
 
   const { totals } = report;
   return (
-    <section className="erp-card">
+    <section className="erp-attendance-report">
       <header className="erp-card-title">
         <div>
           <h2>Attendance and submission coverage</h2>
-          <p>
-            {report.date} · {report.schools.length} schools in this view
-          </p>
+          <p>{report.date} · School of Scholars, Katol</p>
         </div>
         <div className="erp-report-actions">
           <button type="button" onClick={() => setReload(reload + 1)}>
@@ -357,13 +380,16 @@ export function ReportPanel({
           <small>{totals.returned} returned for correction</small>
         </div>
       </dl>
-      <p className="erp-callout">
-        The rate is total present divided by total marks in submitted and
-        reviewed registers. On-leave marks are included in the denominator.
-        Missing and returned registers are excluded from the rate. Coverage
-        counts classes with enrolment for the selected date. An empty class does
-        not count as missing.
-      </p>
+      <details className="erp-calculation-note">
+        <summary>How these figures are calculated</summary>
+        <p>
+          The rate is total present divided by total marks in submitted and
+          reviewed registers. On-leave marks are included in the denominator.
+          Missing and returned registers are excluded from the rate. Coverage
+          counts classes with enrolment for the selected date. An empty class
+          does not count as missing.
+        </p>
+      </details>
       {report.schools.length === 0 && (
         <p>No schools are assigned to this account.</p>
       )}

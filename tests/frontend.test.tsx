@@ -32,6 +32,7 @@ const { render, screen, fireEvent, waitFor, cleanup } =
 const { AdmissionsPanel } = await import('../components/erp/admissions');
 const { FeesPanel } = await import('../components/erp/fees');
 const { SetupPanel } = await import('../components/erp/setup');
+const { PortalPanel } = await import('../components/erp/portals');
 
 const view = {
   classes: [{ id: 'c1', label: 'Class 5 / A' }],
@@ -122,6 +123,7 @@ void test('fee collection requires noncash references and gives explicit empty l
         'No collections recorded. Saved receipts appear here after a payment.',
       ),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Receipts' }));
     assert.ok(
       screen
         .getByRole('region', { name: 'Collection receipts' })
@@ -271,6 +273,145 @@ void test('school setup uses task areas, keeps drafts, and saves a class into it
       screen.getByRole('button', { name: 'Open student register' }),
     );
     assert.equal(opened, true);
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('staff request queue shows the chosen record and filters completed decisions', async () => {
+  const original = globalThis.fetch;
+  const requests = [
+    {
+      id: 'r1',
+      schoolId: 'school',
+      studentId: null,
+      studentName: null,
+      accountId: 'staff',
+      kind: 'leave',
+      requestedOn: '2026-11-20',
+      message: 'First leave details',
+      status: 'submitted',
+      createdAt: '2026-11-20T10:00:00Z',
+      owner: 'Staff Member',
+    },
+    {
+      id: 'r2',
+      schoolId: 'school',
+      studentId: null,
+      studentName: null,
+      accountId: 'staff',
+      kind: 'service',
+      requestedOn: '2026-11-21',
+      message: 'Second service details',
+      status: 'approved',
+      createdAt: '2026-11-20T11:00:00Z',
+      owner: 'Staff Member',
+    },
+  ];
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      children: [],
+      schools: [
+        { id: 'school', code: 'SOS-KATOL', name: 'School of Scholars' },
+      ],
+      requests,
+      history: [],
+      canReview: false,
+    });
+  try {
+    render(
+      <PortalPanel
+        account={{
+          id: 'staff',
+          username: 'staff',
+          name: 'Staff Member',
+          role: 'staff',
+        }}
+        date="2026-11-20"
+      />,
+    );
+    await screen.findByRole('button', { name: /Leave · 2026-11-20/ });
+    const first = screen.getByText('First leave details');
+    assert.equal(first.closest('article')!.hidden, false);
+    fireEvent.click(
+      screen.getByRole('button', { name: /Campus service · 2026-11-21/ }),
+    );
+    assert.equal(first.closest('article')!.hidden, true);
+    assert.equal(
+      screen.getByText('Second service details').closest('article')!.hidden,
+      false,
+    );
+    fireEvent.change(screen.getByLabelText('Request status'), {
+      target: { value: 'approved' },
+    });
+    assert.equal(
+      screen.queryByRole('button', { name: /Leave · 2026-11-20/ }),
+      null,
+    );
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('parent child switch updates the visible child and the leave-request target together', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      schools: [],
+      requests: [],
+      history: [],
+      canReview: false,
+      children: [
+        {
+          id: 's1',
+          name: 'First Child',
+          roll: '1',
+          schoolId: 'school',
+          school: 'School of Scholars',
+          className: '5 / A',
+          attendance: null,
+          charges: [],
+          receipts: [],
+        },
+        {
+          id: 's2',
+          name: 'Second Child',
+          roll: '2',
+          schoolId: 'school',
+          school: 'School of Scholars',
+          className: '6 / A',
+          attendance: { mark: 'present', status: 'submitted' },
+          charges: [],
+          receipts: [],
+        },
+      ],
+    });
+  try {
+    render(
+      <PortalPanel
+        account={{
+          id: 'parent',
+          username: 'parent',
+          name: 'Guardian',
+          role: 'parent',
+        }}
+        date="2026-11-20"
+      />,
+    );
+    await screen.findByRole('heading', { name: 'First Child' });
+    const childSelects = screen.getAllByLabelText('Child');
+    fireEvent.change(childSelects[0], { target: { value: 's2' } });
+    assert.equal(screen.queryByRole('heading', { name: 'First Child' }), null);
+    assert.ok(screen.getByRole('heading', { name: 'Second Child' }));
+    assert.equal(
+      (screen.getAllByLabelText('Child')[1] as unknown as HTMLSelectElement)
+        .value,
+      's2',
+    );
   } finally {
     cleanup();
     globalThis.fetch = original;

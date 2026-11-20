@@ -60,7 +60,7 @@ export function AdmissionsPanel({
         .includes(search.trim().toLowerCase()),
     ) ?? [];
   return (
-    <section className="erp-card scholars-admissions">
+    <section className="erp-admissions scholars-admissions">
       {error && (
         <p role="alert" className="erp-error">
           {error}
@@ -85,126 +85,136 @@ export function AdmissionsPanel({
         )
       ) : (
         <>
-          <details className="erp-entry-panel">
-            <summary>Enrol a student</summary>
-            {!view.classes.length && (
-              <p className="erp-callout">
-                Create a class in School setup before enrolling students.
-              </p>
-            )}
-            <form aria-busy={busy} onSubmit={submit}>
-              <fieldset
-                className="scholars-admission-form"
-                disabled={busy || !view.classes.length}
-              >
-                <legend>Student and class details</legend>
+          <div className="erp-admission-workbench">
+            <section className="erp-admission-register">
+              <div className="erp-register-toolbar">
+                <h3>
+                  Student register{' '}
+                  <span className="erp-count">{view.students.length}</span>
+                </h3>
                 <label>
-                  Student name
-                  <input name="name" required maxLength={120} />
-                </label>
-                <label>
-                  Class
-                  <select name="classId" required>
-                    {view.classes.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Class roll number
-                  <input name="roll" required maxLength={30} />
-                </label>
-                <label>
-                  Admission date
+                  Search students
                   <input
-                    type="date"
-                    name="effectiveOn"
-                    defaultValue={date}
-                    max={date}
-                    required
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Name, class or roll number"
                   />
                 </label>
-                <button
-                  className="erp-primary"
-                  disabled={busy || !view.classes.length}
-                >
-                  {busy ? 'Saving…' : 'Admit student'}
-                </button>
-              </fieldset>
-            </form>
-          </details>
-          <div className="erp-register-toolbar">
-            <h3>
-              Student register{' '}
-              <span className="erp-count">{view.students.length}</span>
-            </h3>
-            <label>
-              Search students
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Name, class or roll number"
-              />
-            </label>
-          </div>
-          <p className="erp-table-description">
-            {students.length} of {view.students.length} students
-          </p>
-          <section
-            className="erp-scroll"
-            aria-label="Student register"
-            tabIndex={0}
-          >
-            <table className="erp-table">
-              <caption className="erp-sr-only">
-                Enrolled students and their class allocations
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Class</th>
-                  <th scope="col">Roll</th>
-                  <th scope="col">Admitted</th>
-                  {onOpenFees && <th scope="col">Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {!students.length && (
-                  <tr>
-                    <td colSpan={onOpenFees ? 5 : 4}>
-                      {search
-                        ? 'No students match your search.'
-                        : 'No students enrolled. Use Enrol a student to add the first record.'}
-                    </td>
-                  </tr>
-                )}
-                {students.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.name}</td>
-                    <td>
-                      {view.classes.find((c) => c.id === s.classId)?.label}
-                    </td>
-                    <td>{s.roll}</td>
-                    <td>{s.effectiveOn}</td>
-                    {onOpenFees && (
-                      <td>
-                        <button
-                          type="button"
-                          onClick={() => onOpenFees(s.id)}
-                          aria-label={'View fees for ' + s.name}
-                        >
-                          View fees
-                        </button>
-                      </td>
+              </div>
+              <p className="erp-table-description">
+                {students.length} of {view.students.length} students
+              </p>
+              <section
+                className="erp-scroll"
+                aria-label="Student register"
+                tabIndex={0}
+              >
+                <table className="erp-table">
+                  <caption className="erp-sr-only">
+                    Enrolled students and their class allocations
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Class</th>
+                      <th scope="col">Roll</th>
+                      <th scope="col">Admitted</th>
+                      {onOpenFees && <th scope="col">Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!students.length && (
+                      <tr>
+                        <td colSpan={onOpenFees ? 5 : 4}>
+                          {search
+                            ? 'No students match your search.'
+                            : 'No students enrolled. Use Enrol a student to add the first record.'}
+                        </td>
+                      </tr>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+                    {students.map((s) => (
+                      <tr key={s.id}>
+                        <td>{s.name}</td>
+                        <td>
+                          {view.classes.find((c) => c.id === s.classId)?.label}
+                        </td>
+                        <td>{s.roll}</td>
+                        <td>{s.effectiveOn}</td>
+                        {onOpenFees && (
+                          <td>
+                            <button
+                              type="button"
+                              onClick={() => onOpenFees(s.id)}
+                              aria-label={'View fees for ' + s.name}
+                            >
+                              View fees
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+            </section>
+            <aside
+              className="erp-admission-editor"
+              aria-label="Student enrolment"
+            >
+              {' '}
+              <details className="erp-entry-panel" open>
+                <summary>Enrol a student</summary>
+                {!view.classes.length && (
+                  <p className="erp-callout">
+                    Create a class in School setup before enrolling students.
+                  </p>
+                )}
+                <form aria-busy={busy} onSubmit={submit}>
+                  <fieldset
+                    className="scholars-admission-form"
+                    disabled={busy || !view.classes.length}
+                  >
+                    <legend>Student and class details</legend>
+                    <label>
+                      Student name
+                      <input name="name" required maxLength={120} />
+                    </label>
+                    <label>
+                      Class
+                      <select name="classId" required>
+                        {view.classes.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Class roll number
+                      <input name="roll" required maxLength={30} />
+                    </label>
+                    <label>
+                      Admission date
+                      <input
+                        type="date"
+                        name="effectiveOn"
+                        defaultValue={date}
+                        max={date}
+                        required
+                      />
+                    </label>
+                    <button
+                      className="erp-primary"
+                      disabled={busy || !view.classes.length}
+                    >
+                      {busy ? 'Saving…' : 'Admit student'}
+                    </button>
+                  </fieldset>
+                </form>
+              </details>
+            </aside>
+          </div>
         </>
       )}
     </section>

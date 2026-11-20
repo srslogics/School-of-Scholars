@@ -1066,3 +1066,249 @@ output.erp-login {
     font-size: 11px;
   }
 }
+
+/* Task-specific work areas share controls, rather than a repeated outer card. */
+.erp-admission-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 22px;
+  align-items: start;
+}
+.erp-admission-register {
+  min-width: 0;
+}
+.erp-admission-register .erp-register-toolbar {
+  margin-top: 0;
+}
+.erp-admission-editor {
+  border-left: 1px solid var(--line);
+  padding-left: 18px;
+}
+.erp-admission-editor .erp-entry-panel {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.erp-admission-editor .scholars-admission-form {
+  grid-template-columns: minmax(0, 1fr);
+}
+.erp-finance > .erp-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  gap: 28px;
+}
+.erp-finance > .erp-kpis > div {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  min-width: 150px;
+}
+.erp-finance > .erp-kpis dd {
+  font-size: 23px;
+  margin-top: 4px;
+}
+.erp-finance-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: start;
+}
+.erp-finance-ledger {
+  min-width: 0;
+}
+.erp-finance-ledger .erp-history {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  font-size: 13px;
+}
+.erp-finance-editor {
+  border-left: 1px solid var(--line);
+  padding-left: 18px;
+}
+.erp-finance-entry h3 {
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+.erp-finance-forms form {
+  display: grid;
+  gap: 12px;
+}
+.erp-attendance-sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px;
+}
+.erp-register-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  font-size: 12px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.erp-register-progress strong {
+  color: var(--ink);
+}
+.erp-attendance-sheet .erp-table td:last-child {
+  width: 210px;
+}
+.erp-attendance-sheet .erp-form-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+}
+.erp-attendance-sheet .erp-form-actions > label {
+  max-width: 540px;
+}
+.erp-history summary,
+.erp-calculation-note summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+.erp-attendance-report .erp-kpis {
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.erp-attendance-report .erp-kpis > div {
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+}
+.erp-calculation-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 12px 0;
+}
+.erp-calculation-note p {
+  max-width: 760px;
+  line-height: 1.65;
+}
+.erp-request-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin: 14px 0;
+}
+.erp-request-toolbar label {
+  width: 210px;
+}
+.erp-request-toolbar > span {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 8px;
+}
+.erp-requests-workbench {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.erp-request-queue {
+  border-right: 1px solid var(--line);
+  max-height: 480px;
+  overflow-y: auto;
+}
+.erp-shell .erp-request-queue > button {
+  display: grid;
+  width: 100%;
+  text-align: left;
+  justify-content: stretch;
+  gap: 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px;
+  background: transparent;
+}
+.erp-request-queue > button span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.erp-request-queue > button small {
+  text-transform: capitalize;
+  color: var(--navy);
+  font-size: 10px;
+}
+.erp-shell .erp-request-queue > button[aria-current='true'] {
+  background: #f3e6e7;
+  box-shadow: inset 3px 0 var(--navy);
+}
+.erp-request-detail {
+  min-width: 0;
+  padding: 16px;
+}
+.erp-request-detail .erp-request-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.erp-request-composer {
+  max-width: 620px;
+  margin-top: 20px;
+}
+.erp-request-composer:empty {
+  display: none;
+}
+.erp-portal .erp-child-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.erp-child-card {
+  background: var(--surface);
+  border-radius: 6px;
+}
+.erp-child-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.erp-parent-date {
+  display: inline-grid;
+  margin-right: 16px;
+}
+@media (max-width: 1150px) {
+  .erp-admission-workbench,
+  .erp-finance-workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .erp-admission-editor,
+  .erp-finance-editor {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 18px 0 0;
+    max-width: 540px;
+  }
+}
+@media (max-width: 760px) {
+  .erp-requests-workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .erp-request-queue {
+    max-height: 200px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .erp-register-progress {
+    gap: 8px 14px;
+  }
+}
+@media (max-width: 480px) {
+  .erp-child-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

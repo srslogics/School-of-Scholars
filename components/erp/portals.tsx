@@ -16,6 +16,13 @@ export function PortalPanel({
   date: string;
 }) {
   const [view, setView] = useState<View>();
+  const [childId, setChildId] = useState('');
+  const [requestFilter, setRequestFilter] = useState(
+    account.role === 'principal' || account.role === 'administrator'
+      ? 'submitted'
+      : 'all',
+  );
+  const [selectedRequestId, setSelectedRequestId] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -65,18 +72,20 @@ export function PortalPanel({
     }
   }
   const parent = account.role === 'parent';
-  const title = parent
-    ? 'Parent app'
-    : account.role === 'staff'
-      ? 'Staff app'
-      : account.role === 'teacher'
-        ? 'Faculty requests'
-        : 'School requests';
+  const visibleRequests =
+    view?.requests.filter(
+      (r) => requestFilter === 'all' || r.status === requestFilter,
+    ) ?? [];
+  const selectedRequest =
+    visibleRequests.find((r) => r.id === selectedRequestId) ??
+    visibleRequests[0];
+  const selectedChild =
+    view?.children.find((c) => c.id === childId) ?? view?.children[0];
   return (
-    <section className="erp-card erp-portal">
+    <section className="erp-portal">
       <header className="erp-card-title">
         <div>
-          <h2>{title}</h2>
+          <h2>{parent ? 'Children and school updates' : 'Request register'}</h2>
           <p>
             {parent
               ? 'Attendance, fee statements and leave requests for your linked children.'
@@ -134,14 +143,32 @@ export function PortalPanel({
                   office to verify guardian access.
                 </p>
               )}
+              {view.children.length > 1 && (
+                <label className="erp-parent-date">
+                  Child
+                  <select
+                    value={selectedChild?.id ?? ''}
+                    onChange={(e) => setChildId(e.target.value)}
+                  >
+                    {view.children.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <div className="erp-child-grid">
                 {view.children.map((child) => (
-                  <article key={child.id} className="erp-child-card">
+                  <article
+                    key={child.id}
+                    hidden={child.id !== selectedChild?.id}
+                    className="erp-child-card"
+                  >
                     <h3>{child.name}</h3>
                     <p>
                       {child.className} · Roll {child.roll}
                     </p>
-                    <p>{child.school}</p>
                     <dl className="erp-child-summary">
                       <div>
                         <dt>Attendance · {selectedDate}</dt>
@@ -204,143 +231,202 @@ export function PortalPanel({
               </div>
             </>
           )}
-          {!view.canReview && (
-            <details className="erp-entry-panel">
-              <summary>
-                {parent ? 'Request leave for a child' : 'Submit a request'}
-              </summary>
-              <form aria-busy={busy} onSubmit={(e) => void submit(e, 'submit')}>
-                <fieldset
-                  disabled={
-                    busy ||
-                    (parent ? !view.children.length : !view.schools.length)
-                  }
-                >
-                  <legend>Request details</legend>
-                  {parent ? (
-                    <>
-                      <label>
-                        Child
-                        <select name="studentId" required>
-                          {view.children.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name} · {c.className}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <input type="hidden" name="kind" value="leave" />
-                    </>
-                  ) : (
-                    <>
-                      <input
-                        type="hidden"
-                        name="schoolId"
-                        value={view.schools[0]?.id ?? ''}
-                      />
-                      <label>
-                        Request type
-                        <select name="kind">
-                          <option value="leave">Leave</option>
-                          <option value="service">Campus service</option>
-                        </select>
-                      </label>
-                    </>
-                  )}
-                  <label>
-                    Requested date
-                    <input
-                      type="date"
-                      name="requestedOn"
-                      defaultValue={date}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Details
-                    <textarea name="message" maxLength={1000} required />
-                  </label>
-                  <button className="erp-primary">
-                    {busy ? 'Submitting…' : 'Submit request'}
-                  </button>
-                </fieldset>
-              </form>
-              {!parent && !view.schools.length && (
-                <p className="erp-callout">
-                  Ask the administrator to assign your school before submitting
-                  a request.
-                </p>
-              )}
-              <p className="erp-table-description">
-                A leave decision does not mark the class register or update
-                payroll. The responsible staff member records those separately.
-              </p>
-            </details>
-          )}
           <h3 className="erp-history">
             {view.canReview ? 'School request register' : 'Your requests'}
           </h3>
-          {!view.requests.length && (
-            <p className="erp-callout">No requests to show.</p>
-          )}
-          <div className="erp-request-list">
-            {view.requests.map((r) => (
-              <article key={r.id} className="erp-request-card">
-                <header>
-                  <h4>
-                    {r.kind === 'leave' ? 'Leave request' : 'Campus service'} ·{' '}
+          <div className="erp-request-toolbar">
+            <label>
+              Request status
+              <select
+                value={requestFilter}
+                disabled={busy}
+                onChange={(e) => setRequestFilter(e.target.value)}
+              >
+                <option value="all">All requests</option>
+                <option value="submitted">Awaiting decision</option>
+                <option value="approved">Approved</option>
+                <option value="declined">Declined</option>
+              </select>
+            </label>
+            <span>{visibleRequests.length} requests</span>
+          </div>
+          <div className="erp-requests-workbench">
+            <nav className="erp-request-queue" aria-label="Request list">
+              {!visibleRequests.length && (
+                <p className="erp-callout">No requests in this view.</p>
+              )}
+              {visibleRequests.map((r) => (
+                <button
+                  type="button"
+                  key={r.id}
+                  disabled={busy}
+                  aria-current={
+                    selectedRequest?.id === r.id ? 'true' : undefined
+                  }
+                  onClick={() => setSelectedRequestId(r.id)}
+                >
+                  <strong>
+                    {r.kind === 'leave' ? 'Leave' : 'Campus service'} ·{' '}
                     {r.requestedOn}
-                  </h4>
-                  <span className="erp-status">{r.status}</span>
-                </header>
-                <p>
-                  {r.owner}
-                  {r.studentId
-                    ? ' · ' + (r.studentName || 'Student leave')
-                    : ''}
+                  </strong>
+                  <span>{r.studentName || r.owner}</span>
+                  <small>{r.status}</small>
+                </button>
+              ))}
+            </nav>
+            <div className="erp-request-detail">
+              {!selectedRequest && (
+                <p className="erp-table-description">
+                  Select a request to view its details and decision history.
                 </p>
-                <p className="erp-request-message">{r.message}</p>
-                <details>
-                  <summary>View history</summary>
-                  <ol>
-                    {view.history
-                      .filter((h) => h.requestId === r.id)
-                      .map((h, i) => (
-                        <li key={i}>
-                          {h.action} · {h.actor} ·{' '}
-                          {new Date(h.at).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata',
-                          })}
-                          <p>{h.note}</p>
-                        </li>
-                      ))}
-                  </ol>
-                </details>
-                {view.canReview &&
-                  r.status === 'submitted' &&
-                  r.accountId !== account.id && (
-                    <form onSubmit={(e) => void submit(e, 'review')}>
-                      <fieldset disabled={busy}>
-                        <legend>Review request</legend>
-                        <input type="hidden" name="id" value={r.id} />
+              )}
+              {visibleRequests.map((r) => (
+                <article
+                  key={r.id}
+                  hidden={selectedRequest?.id !== r.id}
+                  className="erp-request-card"
+                >
+                  <header>
+                    <h4>
+                      {r.kind === 'leave' ? 'Leave request' : 'Campus service'}{' '}
+                      · {r.requestedOn}
+                    </h4>
+                    <span className="erp-status">{r.status}</span>
+                  </header>
+                  <p>
+                    {r.owner}
+                    {r.studentId
+                      ? ' · ' + (r.studentName || 'Student leave')
+                      : ''}
+                  </p>
+                  <p className="erp-request-message">{r.message}</p>
+                  <details>
+                    <summary>View history</summary>
+                    <ol>
+                      {view.history
+                        .filter((h) => h.requestId === r.id)
+                        .map((h, i) => (
+                          <li key={i}>
+                            {h.action} · {h.actor} ·{' '}
+                            {new Date(h.at).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata',
+                            })}
+                            <p>{h.note}</p>
+                          </li>
+                        ))}
+                    </ol>
+                  </details>
+                  {view.canReview &&
+                    r.status === 'submitted' &&
+                    r.accountId !== account.id && (
+                      <form onSubmit={(e) => void submit(e, 'review')}>
+                        <fieldset disabled={busy}>
+                          <legend>Review request</legend>
+                          <input type="hidden" name="id" value={r.id} />
+                          <label>
+                            Decision
+                            <select name="decision">
+                              <option value="approved">Approve</option>
+                              <option value="declined">Decline</option>
+                            </select>
+                          </label>
+                          <label>
+                            Review note
+                            <textarea name="note" required maxLength={1000} />
+                          </label>
+                          <button className="erp-primary">Save decision</button>
+                        </fieldset>
+                      </form>
+                    )}
+                </article>
+              ))}
+            </div>
+          </div>
+          <aside className="erp-request-composer" aria-label="New request">
+            {' '}
+            {!view.canReview && (
+              <details className="erp-entry-panel">
+                <summary>
+                  {parent ? 'Request leave for a child' : 'Submit a request'}
+                </summary>
+                <form
+                  aria-busy={busy}
+                  onSubmit={(e) => void submit(e, 'submit')}
+                >
+                  <fieldset
+                    disabled={
+                      busy ||
+                      (parent ? !view.children.length : !view.schools.length)
+                    }
+                  >
+                    <legend>Request details</legend>
+                    {parent ? (
+                      <>
                         <label>
-                          Decision
-                          <select name="decision">
-                            <option value="approved">Approve</option>
-                            <option value="declined">Decline</option>
+                          Child
+                          <select
+                            name="studentId"
+                            required
+                            defaultValue={selectedChild?.id}
+                            key={selectedChild?.id}
+                          >
+                            {view.children.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name} · {c.className}
+                              </option>
+                            ))}
                           </select>
                         </label>
+                        <input type="hidden" name="kind" value="leave" />
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="hidden"
+                          name="schoolId"
+                          value={view.schools[0]?.id ?? ''}
+                        />
                         <label>
-                          Review note
-                          <textarea name="note" required maxLength={1000} />
+                          Request type
+                          <select name="kind">
+                            <option value="leave">Leave</option>
+                            <option value="service">Campus service</option>
+                          </select>
                         </label>
-                        <button className="erp-primary">Save decision</button>
-                      </fieldset>
-                    </form>
-                  )}
-              </article>
-            ))}
-          </div>
+                      </>
+                    )}
+                    <label>
+                      Requested date
+                      <input
+                        type="date"
+                        name="requestedOn"
+                        defaultValue={date}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Details
+                      <textarea name="message" maxLength={1000} required />
+                    </label>
+                    <button className="erp-primary">
+                      {busy ? 'Submitting…' : 'Submit request'}
+                    </button>
+                  </fieldset>
+                </form>
+                {!parent && !view.schools.length && (
+                  <p className="erp-callout">
+                    Ask the administrator to assign your school before
+                    submitting a request.
+                  </p>
+                )}
+                <p className="erp-table-description">
+                  A leave decision does not mark the class register or update
+                  payroll. The responsible staff member records those
+                  separately.
+                </p>
+              </details>
+            )}
+          </aside>
         </>
       )}
     </section>

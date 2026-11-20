@@ -277,8 +277,11 @@ void test('parent, faculty and staff portals enforce links, isolation, review hi
     );
     assert.equal(workspacePath('parent'), '/parent-app');
     assert.equal(workspacePath('staff'), '/staff-app');
-    assert.equal(workspacePath('teacher'), '/erp');
+    assert.equal(workspacePath('teacher'), '/faculty-app');
     assert.equal(workspacePath('administrator'), '/erp');
+    assert.equal(workspacePath('principal'), '/principal-app');
+    assert.equal(workspacePath('officer'), '/office-app');
+    assert.equal(workspacePath('commissioner'), '/management-app');
 
     const staffCookie = await signed('staff');
     assert.equal(

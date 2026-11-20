@@ -84,3 +84,7 @@ This product serves School of Scholars, Kolambi, Katol only. School creation is 
 ## App links
 
 Use /erp for administration, faculty, office, principal and management; /parent-app for parents; and /staff-app for campus staff. Each page has its own sign-in context and shares server-side authentication and records. Signing in or opening a link with an existing session directs the user to their role's canonical app. The API continues to enforce record permissions on every request. These apps share the same browser session cookie; use separate browser profiles when testing multiple roles simultaneously.
+
+## Additional role entry links
+
+Faculty use /faculty-app, principals use /principal-app, school office use /office-app, and management use /management-app. Administrator access remains /erp; parent and staff retain their dedicated paths. Existing class/date links through /erp retain their query when routed to the signed-in user's app. These links open currently implemented role workflows. Dedicated student, Accounts, Library, Transport and HR/payroll apps require further implementation and confirmed permissions.

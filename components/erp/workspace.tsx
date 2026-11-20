@@ -20,6 +20,7 @@ import {
 } from 'react';
 import {
   workspacePath,
+  workspaceLabels,
   type Workspace,
   type WorkspacePath,
 } from '@/lib/erp/model';
@@ -51,12 +52,7 @@ export function ErpWorkspace({
   const [error, setError] = useState('');
   const [unavailable, setUnavailable] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
-  const entryLabel =
-    entryPath === '/parent-app'
-      ? 'Parent app'
-      : entryPath === '/staff-app'
-        ? 'Staff app'
-        : 'School ERP';
+  const entryLabel = workspaceLabels[entryPath];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -65,7 +61,9 @@ export function ErpWorkspace({
         if (!controller.signal.aborted) {
           if (workspacePath(result.account.role) !== entryPath) {
             setRedirecting(true);
-            window.location.replace(workspacePath(result.account.role));
+            window.location.replace(
+              workspacePath(result.account.role) + window.location.search,
+            );
           } else setWorkspace(result);
         }
       })
@@ -96,7 +94,9 @@ export function ErpWorkspace({
       const session = await request<Workspace>('session');
       if (workspacePath(session.account.role) !== entryPath) {
         setRedirecting(true);
-        window.location.replace(workspacePath(session.account.role));
+        window.location.replace(
+          workspacePath(session.account.role) + window.location.search,
+        );
       } else setWorkspace(session);
     } catch (failure) {
       setError(errorMessage(failure));

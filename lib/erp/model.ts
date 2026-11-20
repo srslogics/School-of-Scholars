@@ -102,10 +102,27 @@ export function attendanceRate(counts: Counts) {
     : '—';
 }
 
-export type WorkspacePath = '/erp' | '/parent-app' | '/staff-app';
+export const workspaceLabels = {
+  '/erp': 'School ERP',
+  '/parent-app': 'Parent app',
+  '/staff-app': 'Staff app',
+  '/faculty-app': 'Faculty app',
+  '/principal-app': 'Principal app',
+  '/office-app': 'School office',
+  '/management-app': 'Management app',
+} as const;
 
+export type WorkspacePath = keyof typeof workspaceLabels;
+
+const rolePaths: Record<Role, WorkspacePath> = {
+  administrator: '/erp',
+  parent: '/parent-app',
+  staff: '/staff-app',
+  teacher: '/faculty-app',
+  principal: '/principal-app',
+  officer: '/office-app',
+  commissioner: '/management-app',
+};
 export function workspacePath(role: Role): WorkspacePath {
-  if (role === 'parent') return '/parent-app';
-  if (role === 'staff') return '/staff-app';
-  return '/erp';
+  return rolePaths[role];
 }

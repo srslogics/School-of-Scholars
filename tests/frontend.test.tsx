@@ -473,3 +473,108 @@ void test('parent report cards show zero marks and expose no mark-entry or publi
     globalThis.fetch = original;
   }
 });
+
+void test('unlinked parents get one access message without unusable attendance or request controls', async () => {
+  const original = globalThis.fetch;
+  let linked = false;
+  const availability: boolean[] = [];
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      schools: [],
+      requests: [],
+      history: [],
+      canReview: false,
+      children: linked
+        ? [
+            {
+              id: 'child',
+              name: 'Linked Child',
+              roll: '1',
+              schoolId: 'school',
+              school: 'School of Scholars',
+              className: '5 · A',
+              attendance: null,
+              charges: [],
+              receipts: [],
+            },
+          ]
+        : [],
+    });
+  try {
+    render(
+      <PortalPanel
+        account={{
+          id: 'parent',
+          username: 'parent',
+          name: 'Guardian',
+          role: 'parent',
+        }}
+        date="2026-11-20"
+        onHasChildren={(value) => availability.push(value)}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'No child linked' });
+    assert.equal(screen.queryByLabelText('Attendance date'), null);
+    assert.equal(screen.queryByLabelText('Request status'), null);
+    assert.equal(screen.queryByText('Request leave for a child'), null);
+    assert.equal(
+      screen.queryByText(
+        'Select a request to view its details and decision history.',
+      ),
+      null,
+    );
+    assert.equal(availability.at(-1), false);
+    linked = true;
+    fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
+    await screen.findByRole('heading', { name: 'Linked Child' });
+    assert.equal(availability.at(-1), true);
+    assert.ok(screen.getByLabelText('Attendance date'));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('empty staff requests have one empty-state line without an empty detail pane', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      date: '2026-11-20',
+      schools: [
+        { id: 'school', name: 'School of Scholars', code: 'SOS-KATOL' },
+      ],
+      children: [],
+      requests: [],
+      history: [],
+      canReview: false,
+    });
+  try {
+    render(
+      <PortalPanel
+        account={{
+          id: 'staff',
+          username: 'staff',
+          name: 'Staff',
+          role: 'staff',
+        }}
+        date="2026-11-20"
+      />,
+    );
+    await screen.findByText('No requests in this view.');
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Request list' }),
+      null,
+    );
+    assert.equal(
+      screen.queryByText(
+        'Select a request to view its details and decision history.',
+      ),
+      null,
+    );
+    assert.ok(screen.getByText('Submit a request'));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

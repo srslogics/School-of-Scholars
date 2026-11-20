@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, type SubmitEvent } from 'react';
+import { GraduationCap } from 'lucide-react';
 import { request, errorMessage } from './client';
 import type { portal } from '@/lib/erp/portals';
 import type { Account } from '@/lib/erp/model';
@@ -11,9 +12,11 @@ const rupees = (value: number) =>
 export function PortalPanel({
   account,
   date,
+  onHasChildren,
 }: {
   account: Account;
   date: string;
+  onHasChildren?: (value: boolean) => void;
 }) {
   const [view, setView] = useState<View>();
   const [childId, setChildId] = useState('');
@@ -37,13 +40,16 @@ export function PortalPanel({
       controller.signal,
     )
       .then((data) => {
-        if (!controller.signal.aborted) setView(data);
+        if (!controller.signal.aborted) {
+          setView(data);
+          onHasChildren?.(data.children.length > 0);
+        }
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(errorMessage(e));
       });
     return () => controller.abort();
-  }, [selectedDate, reload]);
+  }, [selectedDate, reload, onHasChildren]);
   async function submit(
     event: SubmitEvent<HTMLFormElement>,
     action: 'submit' | 'review',
@@ -81,18 +87,47 @@ export function PortalPanel({
     visibleRequests[0];
   const selectedChild =
     view?.children.find((c) => c.id === childId) ?? view?.children[0];
+  if (parent && (!view || !view.children.length))
+    return (
+      <section className="erp-parent-empty" aria-label="Guardian access">
+        {!view && !error ? (
+          <output>Loading your children…</output>
+        ) : (
+          <>
+            <GraduationCap size={24} aria-hidden="true" />
+            <h2>
+              {error ? 'Could not load your children' : 'No child linked'}
+            </h2>
+            <p>
+              {error ||
+                'Ask the school office to link your account to your child.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setError('');
+                setView(undefined);
+                setReload((r) => r + 1);
+              }}
+            >
+              Check again
+            </button>
+          </>
+        )}
+      </section>
+    );
   return (
     <section className="erp-portal">
       <header className="erp-card-title">
         <div>
-          <h2>{parent ? 'Children and school updates' : 'Request register'}</h2>
-          <p>
-            {parent
-              ? 'Attendance, fee statements and leave requests for your linked children.'
-              : account.role === 'principal' || account.role === 'administrator'
-                ? 'Review parent, faculty and staff requests for your school.'
-                : 'Submit a leave or campus service request and track the school’s response.'}
-          </p>
+          <h2>{parent ? 'My children' : 'Request register'}</h2>
+          {!parent && (
+            <p>
+              {account.role === 'principal' || account.role === 'administrator'
+                ? 'Review school requests.'
+                : 'Track your leave and service requests.'}
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -137,12 +172,7 @@ export function PortalPanel({
                   }}
                 />
               </label>
-              {!view.children.length && (
-                <p className="erp-callout">
-                  No children are linked to your account. Contact the school
-                  office to verify guardian access.
-                </p>
-              )}
+
               {view.children.length > 1 && (
                 <label className="erp-parent-date">
                   Child
@@ -250,98 +280,103 @@ export function PortalPanel({
             </label>
             <span>{visibleRequests.length} requests</span>
           </div>
-          <div className="erp-requests-workbench">
-            <nav className="erp-request-queue" aria-label="Request list">
-              {!visibleRequests.length && (
-                <p className="erp-callout">No requests in this view.</p>
-              )}
-              {visibleRequests.map((r) => (
-                <button
-                  type="button"
-                  key={r.id}
-                  disabled={busy}
-                  aria-current={
-                    selectedRequest?.id === r.id ? 'true' : undefined
-                  }
-                  onClick={() => setSelectedRequestId(r.id)}
-                >
-                  <strong>
-                    {r.kind === 'leave' ? 'Leave' : 'Campus service'} ·{' '}
-                    {r.requestedOn}
-                  </strong>
-                  <span>{r.studentName || r.owner}</span>
-                  <small>{r.status}</small>
-                </button>
-              ))}
-            </nav>
-            <div className="erp-request-detail">
-              {!selectedRequest && (
-                <p className="erp-table-description">
-                  Select a request to view its details and decision history.
-                </p>
-              )}
-              {visibleRequests.map((r) => (
-                <article
-                  key={r.id}
-                  hidden={selectedRequest?.id !== r.id}
-                  className="erp-request-card"
-                >
-                  <header>
-                    <h4>
-                      {r.kind === 'leave' ? 'Leave request' : 'Campus service'}{' '}
-                      · {r.requestedOn}
-                    </h4>
-                    <span className="erp-status">{r.status}</span>
-                  </header>
-                  <p>
-                    {r.owner}
-                    {r.studentId
-                      ? ' · ' + (r.studentName || 'Student leave')
-                      : ''}
+          {!visibleRequests.length ? (
+            <p className="erp-empty-line">No requests in this view.</p>
+          ) : (
+            <div className="erp-requests-workbench">
+              <nav className="erp-request-queue" aria-label="Request list">
+                {visibleRequests.map((r) => (
+                  <button
+                    type="button"
+                    key={r.id}
+                    disabled={busy}
+                    aria-current={
+                      selectedRequest?.id === r.id ? 'true' : undefined
+                    }
+                    onClick={() => setSelectedRequestId(r.id)}
+                  >
+                    <strong>
+                      {r.kind === 'leave' ? 'Leave' : 'Campus service'} ·{' '}
+                      {r.requestedOn}
+                    </strong>
+                    <span>{r.studentName || r.owner}</span>
+                    <small>{r.status}</small>
+                  </button>
+                ))}
+              </nav>
+              <div className="erp-request-detail">
+                {!selectedRequest && (
+                  <p className="erp-table-description">
+                    Select a request to view its details and decision history.
                   </p>
-                  <p className="erp-request-message">{r.message}</p>
-                  <details>
-                    <summary>View history</summary>
-                    <ol>
-                      {view.history
-                        .filter((h) => h.requestId === r.id)
-                        .map((h, i) => (
-                          <li key={i}>
-                            {h.action} · {h.actor} ·{' '}
-                            {new Date(h.at).toLocaleString('en-IN', {
-                              timeZone: 'Asia/Kolkata',
-                            })}
-                            <p>{h.note}</p>
-                          </li>
-                        ))}
-                    </ol>
-                  </details>
-                  {view.canReview &&
-                    r.status === 'submitted' &&
-                    r.accountId !== account.id && (
-                      <form onSubmit={(e) => void submit(e, 'review')}>
-                        <fieldset disabled={busy}>
-                          <legend>Review request</legend>
-                          <input type="hidden" name="id" value={r.id} />
-                          <label>
-                            Decision
-                            <select name="decision">
-                              <option value="approved">Approve</option>
-                              <option value="declined">Decline</option>
-                            </select>
-                          </label>
-                          <label>
-                            Review note
-                            <textarea name="note" required maxLength={1000} />
-                          </label>
-                          <button className="erp-primary">Save decision</button>
-                        </fieldset>
-                      </form>
-                    )}
-                </article>
-              ))}
+                )}
+                {visibleRequests.map((r) => (
+                  <article
+                    key={r.id}
+                    hidden={selectedRequest?.id !== r.id}
+                    className="erp-request-card"
+                  >
+                    <header>
+                      <h4>
+                        {r.kind === 'leave'
+                          ? 'Leave request'
+                          : 'Campus service'}{' '}
+                        · {r.requestedOn}
+                      </h4>
+                      <span className="erp-status">{r.status}</span>
+                    </header>
+                    <p>
+                      {r.owner}
+                      {r.studentId
+                        ? ' · ' + (r.studentName || 'Student leave')
+                        : ''}
+                    </p>
+                    <p className="erp-request-message">{r.message}</p>
+                    <details>
+                      <summary>View history</summary>
+                      <ol>
+                        {view.history
+                          .filter((h) => h.requestId === r.id)
+                          .map((h, i) => (
+                            <li key={i}>
+                              {h.action} · {h.actor} ·{' '}
+                              {new Date(h.at).toLocaleString('en-IN', {
+                                timeZone: 'Asia/Kolkata',
+                              })}
+                              <p>{h.note}</p>
+                            </li>
+                          ))}
+                      </ol>
+                    </details>
+                    {view.canReview &&
+                      r.status === 'submitted' &&
+                      r.accountId !== account.id && (
+                        <form onSubmit={(e) => void submit(e, 'review')}>
+                          <fieldset disabled={busy}>
+                            <legend>Review request</legend>
+                            <input type="hidden" name="id" value={r.id} />
+                            <label>
+                              Decision
+                              <select name="decision">
+                                <option value="approved">Approve</option>
+                                <option value="declined">Decline</option>
+                              </select>
+                            </label>
+                            <label>
+                              Review note
+                              <textarea name="note" required maxLength={1000} />
+                            </label>
+                            <button className="erp-primary">
+                              Save decision
+                            </button>
+                          </fieldset>
+                        </form>
+                      )}
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           <aside className="erp-request-composer" aria-label="New request">
             {' '}
             {!view.canReview && (

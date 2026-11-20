@@ -48,6 +48,7 @@ export function ErpWorkspace({
   entryPath?: WorkspacePath;
 }) {
   const [portalArea, setPortalArea] = useState<'daily' | 'academics'>('daily');
+  const [parentHasChildren, setParentHasChildren] = useState<boolean>();
   const [workspace, setWorkspace] = useState<Workspace>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -113,6 +114,7 @@ export function ErpWorkspace({
     try {
       await request('logout', {});
       setWorkspace(undefined);
+      setParentHasChildren(undefined);
     } catch (failure) {
       if (failure instanceof RequestError && failure.status === 401)
         setWorkspace(undefined);
@@ -154,7 +156,10 @@ export function ErpWorkspace({
               <UserRound size={18} aria-hidden="true" />
               <span className="erp-account-name">
                 {workspace.account.name}
-                <small>{roleLabel[workspace.account.role]}</small>
+                {workspace.account.name.toLowerCase() !==
+                  roleLabel[workspace.account.role].toLowerCase() && (
+                  <small>{roleLabel[workspace.account.role]}</small>
+                )}
               </span>
               <button
                 type="button"
@@ -190,8 +195,8 @@ export function ErpWorkspace({
             >
               <h1>
                 {workspace.account.role === 'parent'
-                  ? 'Your child’s school day'
-                  : 'Your staff workspace'}
+                  ? 'Parent portal'
+                  : 'Staff portal'}
               </h1>
               <nav className="erp-setup-tabs" aria-label="App workspace">
                 <button
@@ -205,6 +210,9 @@ export function ErpWorkspace({
                 </button>
                 <button
                   type="button"
+                  disabled={
+                    workspace.account.role === 'parent' && !parentHasChildren
+                  }
                   aria-current={portalArea === 'academics' ? 'page' : undefined}
                   onClick={() => setPortalArea('academics')}
                 >
@@ -217,6 +225,11 @@ export function ErpWorkspace({
                 <PortalPanel
                   account={workspace.account}
                   date={workspace.date}
+                  onHasChildren={
+                    workspace.account.role === 'parent'
+                      ? setParentHasChildren
+                      : undefined
+                  }
                 />
               ) : (
                 <AcademicPanel

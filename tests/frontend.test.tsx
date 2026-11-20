@@ -33,6 +33,7 @@ const { AdmissionsPanel } = await import('../components/erp/admissions');
 const { FeesPanel } = await import('../components/erp/fees');
 const { SetupPanel } = await import('../components/erp/setup');
 const { AcademicPanel } = await import('../components/erp/academics');
+const { PortalWorkspace } = await import('../components/erp/portal-workspace');
 const { PortalPanel } = await import('../components/erp/portals');
 
 const view = {
@@ -749,6 +750,89 @@ void test('unlinked parents can open communication while learning records still 
     assert.ok(screen.getByRole('button', { name: 'Mark as read' }));
     fireEvent.click(screen.getByRole('button', { name: 'Homework' }));
     assert.ok(screen.getByRole('heading', { name: 'No child linked' }));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('parent sidebar groups expose child modules and notices without duplicate top menus', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async (url) =>
+    Response.json(
+      typeof url === 'string' && url.includes('academics')
+        ? {
+            classes: [],
+            students: [],
+            schools: ['school'],
+            teachers: [],
+            timetable: [],
+            homework: [],
+            exams: [],
+            results: [],
+            examRoster: [],
+            notices: [
+              {
+                id: 'n',
+                schoolId: 'school',
+                classId: null,
+                title: 'School announcement',
+                message: 'School notice',
+                author: 'Principal',
+                createdAt: '2026-11-20T10:00:00Z',
+                readAt: null,
+              },
+            ],
+            canSchedule: false,
+            canTeach: false,
+            canPublish: false,
+          }
+        : {
+            date: '2026-11-20',
+            schools: [],
+            children: [],
+            requests: [],
+            history: [],
+            canReview: false,
+          },
+    );
+  try {
+    render(
+      <PortalWorkspace
+        workspace={{
+          account: {
+            id: 'parent',
+            username: 'parent',
+            name: 'Guardian',
+            role: 'parent',
+          },
+          date: '2026-11-20',
+          schools: [],
+          classes: [],
+        }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'No child linked' });
+    assert.ok(screen.getByRole('navigation', { name: 'App navigation' }));
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Parent modules' }),
+      null,
+    );
+    fireEvent.click(screen.getByText('Fees', { selector: 'summary' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Fee statement' }),
+    );
+    assert.ok(screen.getByRole('heading', { level: 1, name: 'Fee statement' }));
+    assert.ok(screen.getByRole('heading', { name: 'No child linked' }));
+    fireEvent.click(screen.getByText('Communication', { selector: 'summary' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'School & class notices' }),
+    );
+    await screen.findByRole('heading', { name: 'School announcement' });
+    assert.equal(
+      screen.queryByRole('navigation', { name: 'Academic module' }),
+      null,
+    );
   } finally {
     cleanup();
     globalThis.fetch = original;

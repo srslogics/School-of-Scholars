@@ -1,19 +1,13 @@
 'use client';
+import { AppSidebar } from './sidebar';
+import { PortalWorkspace } from './portal-workspace';
+import { appNavigation } from '@/lib/erp/navigation';
 import { AcademicPanel, type AcademicArea } from './academics';
 import { PortalPanel } from './portals';
 import { FeesPanel } from './fees';
 import { AdmissionsPanel } from './admissions';
 
-import {
-  GraduationCap,
-  UserRound,
-  UsersRound,
-  WalletCards,
-  ClipboardCheck,
-  ChartNoAxesCombined,
-  Settings2,
-  LogOut,
-} from 'lucide-react';
+import { GraduationCap, UserRound, LogOut } from 'lucide-react';
 import {
   useEffect,
   useState,
@@ -47,7 +41,6 @@ export function ErpWorkspace({
   initial: Initial;
   entryPath?: WorkspacePath;
 }) {
-  const [portalArea, setPortalArea] = useState<'daily' | 'academics'>('daily');
   const [workspace, setWorkspace] = useState<Workspace>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -186,52 +179,7 @@ export function ErpWorkspace({
           )}
           {workspace.account.role === 'parent' ||
           workspace.account.role === 'staff' ? (
-            <div
-              className="erp-main erp-standalone-portal"
-              id="school-content"
-              tabIndex={-1}
-            >
-              <h1>
-                {workspace.account.role === 'parent'
-                  ? 'Parent portal'
-                  : 'Staff portal'}
-              </h1>
-              <nav className="erp-setup-tabs" aria-label="App workspace">
-                <button
-                  type="button"
-                  aria-current={portalArea === 'daily' ? 'page' : undefined}
-                  onClick={() => setPortalArea('daily')}
-                >
-                  {workspace.account.role === 'parent'
-                    ? 'My children'
-                    : 'My requests'}
-                </button>
-                <button
-                  type="button"
-                  aria-current={portalArea === 'academics' ? 'page' : undefined}
-                  onClick={() => setPortalArea('academics')}
-                >
-                  {workspace.account.role === 'parent'
-                    ? 'Learning & notices'
-                    : 'Communication'}
-                </button>
-              </nav>
-              {portalArea === 'daily' ? (
-                <PortalPanel
-                  account={workspace.account}
-                  date={workspace.date}
-                />
-              ) : (
-                <AcademicPanel
-                  account={workspace.account}
-                  initialArea={
-                    workspace.account.role === 'staff'
-                      ? 'communication'
-                      : 'timetable'
-                  }
-                />
-              )}
-            </div>
+            <PortalWorkspace key={workspace.account.id} workspace={workspace} />
           ) : (
             <SignedWorkspace
               key={workspace.account.id}
@@ -330,12 +278,6 @@ function SignedWorkspace({
   const scopedClasses = classes.filter((row) => row.schoolId === schoolId);
   const selectedClass =
     scopedClasses.find((row) => row.id === classId) ?? scopedClasses[0];
-  const canReport =
-    account.role === 'principal' ||
-    account.role === 'officer' ||
-    account.role === 'commissioner';
-  const canRegister =
-    account.role === 'teacher' || account.role === 'principal';
   function openRegister(id: string) {
     const selected = classes.find((row) => row.id === id);
     if (!selected) return;
@@ -347,114 +289,16 @@ function SignedWorkspace({
 
   return (
     <div className="erp-layout">
-      <nav className="erp-nav" aria-label="School workspace">
-        <span>DAILY WORK</span>
-        {account.role === 'administrator' && (
-          <button
-            aria-current={tab === 'setup' ? 'page' : undefined}
-            type="button"
-            onClick={() => setTab('setup')}
-          >
-            <Settings2 size={18} aria-hidden="true" /> School setup
-          </button>
-        )}
-        {(account.role === 'administrator' ||
-          account.role === 'principal' ||
-          account.role === 'officer') && (
-          <button
-            type="button"
-            aria-current={tab === 'admissions' ? 'page' : undefined}
-            onClick={() => {
-              setBadLink(false);
-              setTab('admissions');
-            }}
-          >
-            <UsersRound size={18} aria-hidden="true" /> Admissions & students
-          </button>
-        )}
-        {['administrator', 'principal', 'officer'].includes(account.role) && (
-          <button
-            type="button"
-            aria-current={tab === 'fees' ? 'page' : undefined}
-            onClick={() => {
-              setBadLink(false);
-              setFeeStudentId(undefined);
-              setTab('fees');
-            }}
-          >
-            <WalletCards size={18} aria-hidden="true" /> Fees & collections
-          </button>
-        )}
-        {canRegister && (
-          <button
-            type="button"
-            aria-current={tab === 'register' ? 'page' : undefined}
-            onClick={() => {
-              setBadLink(false);
-              setTab('register');
-            }}
-          >
-            <ClipboardCheck size={18} aria-hidden="true" /> Class attendance
-          </button>
-        )}
-        {canReport && (
-          <button
-            type="button"
-            aria-current={tab === 'report' ? 'page' : undefined}
-            onClick={() => {
-              setBadLink(false);
-              setTab('report');
-            }}
-          >
-            <ChartNoAxesCombined size={18} aria-hidden="true" /> Attendance
-            reports
-          </button>
-        )}
-        {['teacher', 'principal', 'administrator'].includes(account.role) && (
-          <button
-            type="button"
-            aria-current={tab === 'requests' ? 'page' : undefined}
-            onClick={() => {
-              setBadLink(false);
-              setTab('requests');
-            }}
-          >
-            <ClipboardCheck size={18} aria-hidden="true" />
-            {account.role === 'teacher' ? 'My requests' : 'School requests'}
-          </button>
-        )}
-        {['timetable', 'homework', 'exams', 'reports', 'communication']
-          .filter(
-            (key) => account.role !== 'officer' || key === 'communication',
-          )
-          .map((key) => (
-            <button
-              type="button"
-              key={key}
-              aria-current={tab === key ? 'page' : undefined}
-              onClick={() => {
-                setBadLink(false);
-                setTab(key);
-              }}
-            >
-              <GraduationCap size={18} aria-hidden="true" />
-              {
-                {
-                  timetable: 'Timetable',
-                  homework: 'Homework',
-                  exams: 'Examinations',
-                  reports: 'Report cards',
-                  communication: 'Communication',
-                }[key]
-              }
-            </button>
-          ))}
-        <div className="erp-nav-footer">
-          <GraduationCap size={20} aria-hidden="true" />
-          <strong>School of Scholars</strong>
-          <small>Kolambi, Katol</small>
-        </div>
-      </nav>
+      <AppSidebar
+        groups={appNavigation(account.role)}
+        selected={tab}
+        onSelect={(id) => {
+          setBadLink(false);
+          if (id === 'fees') setFeeStudentId(undefined);
+          setTab(id);
+        }}
+      />
+
       <div className="erp-main" id="school-content" tabIndex={-1}>
         <header className="erp-page-title">
           <p>

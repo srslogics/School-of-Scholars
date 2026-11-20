@@ -13,7 +13,7 @@ const parentModules = {
   requests: 'Requests',
   history: 'History',
 } as const;
-type ParentModule = keyof typeof parentModules;
+export type ParentModule = keyof typeof parentModules;
 const rupees = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(
     value / 100,
@@ -22,13 +22,26 @@ export function PortalPanel({
   account,
   date,
   onHasChildren,
+  module,
+  onModuleChange,
+  hideNavigation = false,
+  historyOnly = false,
 }: {
   account: Account;
   date: string;
   onHasChildren?: (value: boolean) => void;
+  module?: ParentModule;
+  onModuleChange?: (module: ParentModule) => void;
+  hideNavigation?: boolean;
+  historyOnly?: boolean;
 }) {
   const [view, setView] = useState<View>();
-  const [parentArea, setParentArea] = useState<ParentModule>('attendance');
+  const [localArea, setLocalArea] = useState<ParentModule>('attendance');
+  const parentArea = module ?? localArea;
+  function setParentArea(area: ParentModule) {
+    setLocalArea(area);
+    onModuleChange?.(area);
+  }
   const [childId, setChildId] = useState('');
   const [requestFilter, setRequestFilter] = useState(
     account.role === 'principal' || account.role === 'administrator'
@@ -99,7 +112,7 @@ export function PortalPanel({
     visibleRequests[0];
   const selectedChild =
     view?.children.find((c) => c.id === childId) ?? view?.children[0];
-  const parentMenu = parent && (
+  const parentMenu = parent && !hideNavigation && (
     <nav className="erp-parent-modules" aria-label="Parent modules">
       {(Object.keys(parentModules) as ParentModule[]).map((key) => (
         <button
@@ -150,16 +163,19 @@ export function PortalPanel({
     <section className="erp-portal">
       {parentMenu}
       <header className="erp-card-title">
-        <div>
-          <h2>{parent ? parentModules[parentArea] : 'Request register'}</h2>
-          {!parent && (
-            <p>
-              {account.role === 'principal' || account.role === 'administrator'
-                ? 'Review school requests.'
-                : 'Track your leave and service requests.'}
-            </p>
-          )}
-        </div>
+        {!hideNavigation && (
+          <div>
+            <h2>{parent ? parentModules[parentArea] : 'Request register'}</h2>
+            {!parent && (
+              <p>
+                {account.role === 'principal' ||
+                account.role === 'administrator'
+                  ? 'Review school requests.'
+                  : 'Track your leave and service requests.'}
+              </p>
+            )}
+          </div>
+        )}
         <button
           type="button"
           disabled={busy}
@@ -390,7 +406,11 @@ export function PortalPanel({
                           : ''}
                       </p>
                       <p className="erp-request-message">{r.message}</p>
-                      <details open={parent && parentArea === 'history'}>
+                      <details
+                        open={
+                          historyOnly || (parent && parentArea === 'history')
+                        }
+                      >
                         <summary>View history</summary>
                         <ol>
                           {view.history
@@ -443,7 +463,7 @@ export function PortalPanel({
           <aside
             className="erp-request-composer"
             aria-label="New request"
-            hidden={parent && parentArea !== 'leave'}
+            hidden={historyOnly || (parent && parentArea !== 'leave')}
           >
             {' '}
             {!view.canReview && (

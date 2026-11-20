@@ -72,3 +72,7 @@ These are the first operational web app workflows. Native mobile packages, push 
 All newly bootstrapped campus accounts use sos2026, as explicitly requested. The account form defaults new users to the same password. Passwords remain individually salted and hashed in the database. The minimum accepted password length is now seven characters. This shared password is temporary and should be replaced before handling real school records.
 
 For an already configured School of Scholars database, set its ERP_DB_PATH or Turso variables and run npm run reset:passwords. This explicitly resets ALL accounts in that database to sos2026 and invalidates existing sessions and login limits. It requires the SOS-KATOL campus code to guard against targeting the inherited NMC database. Run it only when intending to reset all users. Local account files, if present, are updated to match. Re-deploying application code alone does not reset existing database passwords.
+
+## Deployment startup
+
+start:erp now checks the configured database before accepting traffic, applies the additive schema, and bootstraps seven initial accounts only when the database is empty. New account passwords are sos2026 as requested. Existing passwords and records are retained. It refuses a database already containing another school's campus code. A populated database still needs reset:passwords if you intend to reset its existing passwords. Invalid Turso credentials or an unavailable database cause startup to fail instead of serving a working sign-in screen backed by a broken database.

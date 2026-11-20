@@ -16,11 +16,12 @@
     "audit": "npm audit --audit-level=high",
     "dev:erp": "ERP_RUNTIME=node vinext dev",
     "build:erp": "ERP_RUNTIME=node vinext build",
-    "start:erp": "ERP_RUNTIME=node vinext start",
+    "start:erp": "npm run prepare:erp && ERP_RUNTIME=node vinext start",
     "seed:erp": "tsx scripts/seed-erp.ts",
     "bootstrap:school": "tsx scripts/bootstrap-campus.ts",
     "migrate:erp": "tsx scripts/migrate-erp.ts",
-    "reset:passwords": "tsx scripts/reset-passwords.ts"
+    "reset:passwords": "tsx scripts/reset-passwords.ts",
+    "prepare:erp": "tsx scripts/prepare-erp.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

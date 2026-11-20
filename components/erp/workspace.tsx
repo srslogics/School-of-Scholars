@@ -48,7 +48,6 @@ export function ErpWorkspace({
   entryPath?: WorkspacePath;
 }) {
   const [portalArea, setPortalArea] = useState<'daily' | 'academics'>('daily');
-  const [parentHasChildren, setParentHasChildren] = useState<boolean>();
   const [workspace, setWorkspace] = useState<Workspace>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -114,7 +113,6 @@ export function ErpWorkspace({
     try {
       await request('logout', {});
       setWorkspace(undefined);
-      setParentHasChildren(undefined);
     } catch (failure) {
       if (failure instanceof RequestError && failure.status === 401)
         setWorkspace(undefined);
@@ -210,9 +208,6 @@ export function ErpWorkspace({
                 </button>
                 <button
                   type="button"
-                  disabled={
-                    workspace.account.role === 'parent' && !parentHasChildren
-                  }
                   aria-current={portalArea === 'academics' ? 'page' : undefined}
                   onClick={() => setPortalArea('academics')}
                 >
@@ -225,11 +220,6 @@ export function ErpWorkspace({
                 <PortalPanel
                   account={workspace.account}
                   date={workspace.date}
-                  onHasChildren={
-                    workspace.account.role === 'parent'
-                      ? setParentHasChildren
-                      : undefined
-                  }
                 />
               ) : (
                 <AcademicPanel

@@ -225,7 +225,16 @@ void test('academics connects scheduling, homework, locked exam publication, par
     view = await academics(db, parent);
     assert.equal(view.students.length, 0);
     assert.equal(view.results.length, 0);
-    assert.equal(view.notices.length, 0);
+    assert.equal(view.notices.length, 1);
+    assert.equal(view.notices[0].classId, null);
+    await write(parent, {
+      action: 'read-notice',
+      noticeId: view.notices[0].id,
+    });
+    await assert.rejects(
+      write(parent, { action: 'read-notice', noticeId: privateNotice.id }),
+      { status: 404 },
+    );
     assert.ok((await many(db, 'SELECT id FROM academic_event')).length > 0);
     db.close();
     db = openFileDatabase(path);

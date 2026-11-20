@@ -103,13 +103,6 @@ export function AcademicPanel({
   const classInput = (
     <input type="hidden" name="classId" value={selectedClass?.id ?? ''} />
   );
-  if (view && account.role === 'parent' && !view.students.length)
-    return (
-      <section className="erp-parent-empty">
-        <h2>No child linked</h2>
-        <p>Ask the school office to verify your guardian access.</p>
-      </section>
-    );
   return (
     <section className="erp-academic-workspace">
       {!embedded && (
@@ -163,6 +156,16 @@ export function AcademicPanel({
             </button>
           )}
         </>
+      ) : account.role === 'parent' &&
+        !view.students.length &&
+        area !== 'communication' ? (
+        <section className="erp-parent-empty">
+          <h2>No child linked</h2>
+          <p>
+            Linking is required for learning records. School notices are
+            available under Communication.
+          </p>
+        </section>
       ) : (
         <>
           <header className="erp-register-heading">

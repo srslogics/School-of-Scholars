@@ -696,3 +696,61 @@ void test('parent modules remain discoverable without a link and become function
     globalThis.fetch = original;
   }
 });
+
+void test('unlinked parents can open communication while learning records still require a child link', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      classes: [],
+      students: [],
+      schools: ['school'],
+      teachers: [],
+      timetable: [],
+      homework: [],
+      exams: [],
+      results: [],
+      examRoster: [],
+      notices: [
+        {
+          id: 'notice',
+          schoolId: 'school',
+          classId: null,
+          title: 'School announcement',
+          message: 'School-wide update',
+          author: 'Principal',
+          createdAt: '2026-11-20T10:00:00Z',
+          readAt: null,
+        },
+      ],
+      canSchedule: false,
+      canTeach: false,
+      canPublish: false,
+    });
+  try {
+    render(
+      <AcademicPanel
+        account={{
+          id: 'parent',
+          username: 'parent',
+          name: 'Guardian',
+          role: 'parent',
+        }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'No child linked' });
+    const communication = screen.getByRole('button', { name: 'Communication' });
+    assert.equal(communication.hasAttribute('disabled'), false);
+    fireEvent.click(communication);
+    assert.ok(screen.getByRole('heading', { name: 'School announcement' }));
+    assert.equal(
+      screen.queryByRole('heading', { name: 'No child linked' }),
+      null,
+    );
+    assert.ok(screen.getByRole('button', { name: 'Mark as read' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Homework' }));
+    assert.ok(screen.getByRole('heading', { name: 'No child linked' }));
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

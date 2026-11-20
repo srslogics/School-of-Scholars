@@ -61,7 +61,17 @@ async function context(db: Query, account: Account) {
     students,
     schools:
       account.role === 'parent'
-        ? classes.map((c) => c.schoolId)
+        ? [
+            ...new Set([
+              ...classes.map((c) => c.schoolId),
+              ...(
+                await many<{ id: string }>(
+                  db,
+                  "SELECT id FROM school WHERE code='SOS-KATOL'",
+                )
+              ).map((s) => s.id),
+            ]),
+          ]
         : schoolView.schools.map((s) => s.id),
   };
 }

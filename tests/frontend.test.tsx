@@ -8,6 +8,7 @@ for (const key of [
   'HTMLElement',
   'HTMLInputElement',
   'HTMLSelectElement',
+  'HTMLButtonElement',
   'Node',
   'MutationObserver',
   'Event',
@@ -30,6 +31,7 @@ const { render, screen, fireEvent, waitFor, cleanup } =
   await import('@testing-library/react');
 const { AdmissionsPanel } = await import('../components/erp/admissions');
 const { FeesPanel } = await import('../components/erp/fees');
+const { SetupPanel } = await import('../components/erp/setup');
 
 const view = {
   classes: [{ id: 'c1', label: 'Class 5 / A' }],
@@ -199,6 +201,76 @@ void test('student register fee action passes the correct student identifier', a
       }),
     );
     assert.equal(chosen, 's1');
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('school setup uses task areas, keeps drafts, and saves a class into its register', async () => {
+  const original = globalThis.fetch;
+  let data = {
+    schools: [{ id: 'school', name: 'School of Scholars', code: 'SOS-KATOL' }],
+    classes: [],
+    staff: [],
+    assignments: [],
+    enrolments: [],
+    guardians: [],
+  } as import('../lib/erp/model').Setup;
+  globalThis.fetch = async (_url, options) => {
+    if (options?.method === 'POST') {
+      const body = JSON.parse(
+        typeof options.body === 'string' ? options.body : '{}',
+      );
+      assert.equal(body.action, 'class');
+      assert.equal(body.grade, 'Class 6');
+      data = {
+        ...data,
+        classes: [
+          {
+            id: 'class-6',
+            schoolId: 'school',
+            grade: body.grade,
+            section: body.section,
+          },
+        ],
+      };
+    }
+    return Response.json(data);
+  };
+  try {
+    let opened = false;
+    render(
+      <SetupPanel
+        date="2026-11-20"
+        onSaved={() => {}}
+        onOpenAdmissions={() => {
+          opened = true;
+        }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'Classes & sections' });
+    assert.equal(screen.queryByRole('heading', { name: 'School setup' }), null);
+    const grade = screen.getByLabelText('Class') as HTMLInputElement;
+    fireEvent.change(grade, { target: { value: 'Class 6' } });
+    fireEvent.click(screen.getByRole('button', { name: 'User accounts' }));
+    assert.ok(screen.getByRole('heading', { name: 'Create a user account' }));
+    assert.equal(
+      screen.queryByRole('heading', { name: 'Add class and section' }),
+      null,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Classes & sections' }));
+    assert.equal(grade.value, 'Class 6');
+    fireEvent.change(screen.getByLabelText('Section'), {
+      target: { value: 'A' },
+    });
+    fireEvent.submit(grade.closest('form')!);
+    await screen.findByText('Configuration saved.');
+    assert.ok(screen.getByRole('cell', { name: 'Class 6' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open student register' }),
+    );
+    assert.equal(opened, true);
   } finally {
     cleanup();
     globalThis.fetch = original;

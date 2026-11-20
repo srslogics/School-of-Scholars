@@ -456,7 +456,11 @@ function SignedWorkspace({
             }}
           />
         ) : tab === 'setup' ? (
-          <SetupPanel date={workspace.date} onSaved={refresh} />
+          <SetupPanel
+            date={workspace.date}
+            onSaved={refresh}
+            onOpenAdmissions={() => setTab('admissions')}
+          />
         ) : tab === 'report' ? (
           <ReportPanel
             key={`${date}:${schoolId}`}

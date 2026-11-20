@@ -61,11 +61,6 @@ export function AdmissionsPanel({
     ) ?? [];
   return (
     <section className="erp-card scholars-admissions">
-      <h2>Admissions and class allocation</h2>
-      <p>
-        Add a student to their class. The same record is used for daily
-        attendance and fee collections.
-      </p>
       {error && (
         <p role="alert" className="erp-error">
           {error}

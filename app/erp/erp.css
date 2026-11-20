@@ -971,3 +971,98 @@ output.erp-login {
     min-height: 44px;
   }
 }
+
+.erp-setup-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.erp-shell .erp-setup-tabs button {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 9px 14px;
+  color: var(--muted);
+}
+.erp-shell .erp-setup-tabs [aria-current='page'] {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+  font-weight: 650;
+}
+.erp-setup-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: start;
+}
+.erp-setup-register {
+  min-width: 0;
+}
+.erp-register-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.erp-register-heading h2 {
+  font-size: 15px;
+  margin: 0 0 5px;
+  font-weight: 650;
+}
+.erp-register-heading p {
+  font-size: 12px;
+  margin: 0;
+  color: var(--muted);
+}
+.erp-register-heading > button {
+  flex: none;
+}
+.erp-setup-editor {
+  border-left: 1px solid var(--line);
+  padding-left: 20px;
+}
+.erp-setup-editor form,
+.erp-setup-editor fieldset {
+  display: grid;
+  gap: 12px;
+}
+.erp-setup-editor h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.erp-setup-editor p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+.erp-setup-editor .erp-actions {
+  margin-top: 0;
+}
+.erp-setup .erp-scroll {
+  background: var(--surface);
+}
+@media (max-width: 1100px) {
+  .erp-setup-workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .erp-setup-editor {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 18px 0 0;
+    max-width: 520px;
+  }
+  .erp-register-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 480px) {
+  .erp-shell .erp-setup-tabs button {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}

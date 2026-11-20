@@ -233,16 +233,11 @@ export function PortalPanel({
                     </>
                   ) : (
                     <>
-                      <label>
-                        School
-                        <select name="schoolId" required>
-                          {view.schools.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                      <input
+                        type="hidden"
+                        name="schoolId"
+                        value={view.schools[0]?.id ?? ''}
+                      />
                       <label>
                         Request type
                         <select name="kind">

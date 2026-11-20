@@ -52,6 +52,11 @@ export async function updateSetup(
     await write(db, async (tx) => {
       switch (body.action) {
         case 'school':
+          if (await one(tx, "SELECT id FROM school WHERE code='SOS-KATOL'"))
+            throw new ErpError(
+              409,
+              'This installation is for School of Scholars, Katol only.',
+            );
           await run(
             tx,
             'INSERT INTO school VALUES (?, ?, ?)',

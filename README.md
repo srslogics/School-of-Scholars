@@ -76,3 +76,7 @@ For an already configured School of Scholars database, set its ERP_DB_PATH or Tu
 ## Deployment startup
 
 start:erp now checks the configured database before accepting traffic, applies the additive schema, and bootstraps seven initial accounts only when the database is empty. New account passwords are sos2026 as requested. Existing passwords and records are retained. It refuses a database already containing another school's campus code. A populated database still needs reset:passwords if you intend to reset its existing passwords. Invalid Turso credentials or an unavailable database cause startup to fail instead of serving a working sign-in screen backed by a broken database.
+
+## Single-school installation
+
+This product serves School of Scholars, Kolambi, Katol only. School creation is removed from setup and the server rejects creating a second school once the Katol campus exists. Startup refuses a Katol database containing additional school records, preserving them for administrator review. Attendance and personal request screens use the configured school directly. Classes, sections, staff assignments, guardian links and role-specific access remain configurable within that school. Legacy multiple-school fixtures are retained only for permission regression tests.

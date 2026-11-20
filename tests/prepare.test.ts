@@ -57,6 +57,11 @@ void test('deployment prepares a fresh database, signs in, and preserves credent
       ))!.count,
       7,
     );
+    await run(
+      db,
+      "INSERT INTO school VALUES ('unexpected','OTHER','Unexpected school')",
+    );
+    await assert.rejects(prepareCampus(db), /supports one Katol school/);
   } finally {
     db.close();
     rmSync(directory, { recursive: true, force: true });

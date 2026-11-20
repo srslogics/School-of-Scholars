@@ -8,6 +8,7 @@ import {
   initializeDatabase,
   many,
   one,
+  run,
 } from '../lib/erp/database';
 import { bootstrapCampus } from '../lib/erp/campus';
 import { portal, updatePortal } from '../lib/erp/portals';
@@ -160,11 +161,19 @@ void test('parent, faculty and staff portals enforce links, isolation, review hi
     );
     assert.equal((await portal(db, second!, day)).children.length, 0);
     assert.equal((await portal(db, second!, day)).requests.length, 0);
-    await updateSetup(db, admin, {
-      action: 'school',
-      code: 'OTHER',
-      name: 'Other fictional campus',
-    });
+    await assert.rejects(
+      updateSetup(db, admin, {
+        action: 'school',
+        code: 'OTHER',
+        name: 'Other fictional campus',
+      }),
+      { status: 409 },
+    );
+    // A manually inserted foreign-campus fixture proves the remaining scope checks.
+    await run(
+      db,
+      "INSERT INTO school VALUES ('foreign-campus','OTHER','Foreign fixture')",
+    );
     const otherSchool = await one<{ id: string }>(
       db,
       "SELECT id FROM school WHERE code='OTHER'",

@@ -81,7 +81,10 @@ export function SetupPanel({
       <header className="erp-card-title">
         <div>
           <h2>School setup</h2>
-          <p>Use fictional schools, students and staff for this pilot.</p>
+          <p>
+            Configure classes, sections, student records and staff access for
+            School of Scholars, Katol.
+          </p>
         </div>
       </header>
       {error && (
@@ -91,35 +94,13 @@ export function SetupPanel({
       )}
       {message && <output className="erp-success">{message}</output>}
       <div className="erp-setup-grid">
-        <form onSubmit={(event) => void submit(event, 'school')}>
-          <h3>Add school</h3>
-          <label>
-            School name
-            <input name="name" required maxLength={120} />
-          </label>
-          <label>
-            School code
-            <input name="code" required maxLength={24} />
-          </label>
-          <button className="erp-primary" disabled={busy}>
-            Add school
-          </button>
-        </form>
         <form onSubmit={(event) => void submit(event, 'class')}>
           <h3>Add class and section</h3>
-          <label>
-            School
-            <select name="schoolId" required defaultValue="">
-              <option value="" disabled>
-                Choose school
-              </option>
-              {setup.schools.map((school) => (
-                <option key={school.id} value={school.id}>
-                  {school.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <input
+            type="hidden"
+            name="schoolId"
+            value={setup.schools[0]?.id ?? ''}
+          />
           <label>
             Class
             <input name="grade" required maxLength={32} />

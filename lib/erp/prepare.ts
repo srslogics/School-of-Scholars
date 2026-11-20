@@ -16,6 +16,14 @@ export async function prepareCampus(db: Database) {
         'This database belongs to another school installation. Configure the dedicated School of Scholars database.',
       );
   }
+  if (
+    table &&
+    (await one(db, "SELECT id FROM school WHERE code <> 'SOS-KATOL'")) &&
+    (await one(db, "SELECT id FROM school WHERE code = 'SOS-KATOL'"))
+  )
+    throw new Error(
+      'This installation supports one Katol school. Additional school records require review before startup.',
+    );
   await initializeDatabase(db);
   if (!(await one(db, 'SELECT id FROM account LIMIT 1'))) {
     await bootstrapCampus(db, () => initialCampusPassword);

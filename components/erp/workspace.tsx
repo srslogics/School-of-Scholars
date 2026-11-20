@@ -258,10 +258,7 @@ function SignedWorkspace({
     Boolean(initial.classId && !allowedInitial),
   );
   const [schoolId, setSchoolId] = useState(
-    allowedInitial?.schoolId ??
-      (account.role === 'teacher' || account.role === 'principal'
-        ? (schools[0]?.id ?? '')
-        : ''),
+    allowedInitial?.schoolId ?? schools[0]?.id ?? '',
   );
   const [classId, setClassId] = useState(allowedInitial?.id ?? '');
   const [date, setDate] = useState(initial.date ?? workspace.date);
@@ -412,30 +409,6 @@ function SignedWorkspace({
         </header>
         {(tab === 'register' || tab === 'report') && (
           <div className="erp-filters">
-            <label>
-              School workspace
-              <select
-                value={schoolId}
-                onChange={(event) => {
-                  setSchoolId(event.target.value);
-                  setClassId('');
-                  setBadLink(false);
-                }}
-              >
-                {(account.role === 'officer' ||
-                  account.role === 'commissioner') && (
-                  <option value="">All schools in scope</option>
-                )}
-                {!schools.length && canRegister && (
-                  <option value="">No school assigned</option>
-                )}
-                {schools.map((row) => (
-                  <option key={row.id} value={row.id}>
-                    {row.name}
-                  </option>
-                ))}
-              </select>
-            </label>
             <label>
               Attendance date
               <input

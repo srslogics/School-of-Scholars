@@ -77,9 +77,7 @@ export function SetupPanel({
   const staff = setup.staff.find((account) => account.id === staffId);
   const classLabel = (id: string) => {
     const row = setup.classes.find((item) => item.id === id);
-    return row
-      ? `${setup.schools.find((school) => school.id === row.schoolId)?.code} · ${row.grade} / ${row.section}`
-      : id;
+    return row ? row.grade + ' · ' + row.section : id;
   };
 
   const roleName: Record<string, string> = {

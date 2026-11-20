@@ -15,12 +15,12 @@ async function authorisedClasses(db: Query, account: Account) {
   if (account.role === 'administrator')
     return many<{ id: string; label: string }>(
       db,
-      "SELECT c.id, s.name || ' / ' || c.grade || ' / ' || c.section AS label FROM class_section c JOIN school s ON s.id = c.school_id ORDER BY label",
+      "SELECT c.id, c.grade || ' · ' || c.section AS label FROM class_section c JOIN school s ON s.id = c.school_id ORDER BY label",
     );
   if (account.role !== 'principal' && account.role !== 'officer') missing();
   return many<{ id: string; label: string }>(
     db,
-    "SELECT c.id, s.name || ' / ' || c.grade || ' / ' || c.section AS label FROM class_section c JOIN school s ON s.id = c.school_id JOIN school_assignment a ON a.school_id = s.id WHERE a.account_id = ? ORDER BY label",
+    "SELECT c.id, c.grade || ' · ' || c.section AS label FROM class_section c JOIN school s ON s.id = c.school_id JOIN school_assignment a ON a.school_id = s.id WHERE a.account_id = ? ORDER BY label",
     account.id,
   );
 }

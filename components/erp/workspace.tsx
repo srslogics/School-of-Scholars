@@ -426,7 +426,7 @@ function SignedWorkspace({
                   )}
                   {scopedClasses.map((row) => (
                     <option key={row.id} value={row.id}>
-                      {row.grade} · Section {row.section}
+                      {row.grade} · {row.section}
                     </option>
                   ))}
                 </select>

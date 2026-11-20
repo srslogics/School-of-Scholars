@@ -31,6 +31,11 @@ void test('admission joins attendance, rejects duplicates and enforces school an
   try {
     await initializeDatabase(db);
     await seedFictionalSchools(db, () => 'FictionalTesting-1234');
+    assert.equal(
+      (await admissions(db, principal)).classes.find((c) => c.id === 'class-a')
+        ?.label,
+      'Class 5 · A',
+    );
     const body = {
       name: 'Fictional New Learner',
       classId: 'class-a',

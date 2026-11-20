@@ -180,38 +180,13 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
         </>
       ) : (
         <div className="scholars-welcome">
-          <aside className="scholars-intro">
-            <span className="scholars-eyebrow">SCHOOL OF SCHOLARS · KATOL</span>
-            <h1>
-              School administration,
-              <br />
-              in one place.
-            </h1>
-            <p>
-              Your school day, organised. Bring admissions, class registers and
-              student records into one shared workspace.
-            </p>
-            <div className="scholars-intro-notes">
-              <div>
-                <span>01</span>
-                <strong>A student record that stays connected</strong>
-                <p>From admission to the daily class register.</p>
-              </div>
-              <div>
-                <span>02</span>
-                <strong>The right work, for the right person</strong>
-                <p>Teachers and the school office each have their own view.</p>
-              </div>
-            </div>
-            <small>Kolambi, Katol · School operations</small>
-          </aside>
           <section
             className="erp-card erp-login"
             id="school-content"
             tabIndex={-1}
           >
             <span className="scholars-eyebrow">YOUR SCHOOL WORKSPACE</span>
-            <h2>Welcome back</h2>
+            <h1>Sign in</h1>
             <p>Sign in with your school account to continue.</p>
             {error && (
               <p className="erp-error" role="alert">

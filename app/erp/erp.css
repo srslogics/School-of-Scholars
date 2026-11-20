@@ -8,7 +8,7 @@
   background: #f8f4eb;
   color: var(--ink);
   font-family: var(--font-geist-sans), Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.55;
 }
 .erp-shell *,
@@ -59,14 +59,14 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 18px 32px;
+  padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
 .erp-masthead .dept-mark {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   margin: 0;
@@ -76,7 +76,7 @@
   color: var(--navy);
 }
 .erp-masthead strong {
-  font-size: 17px;
+  font-size: 15px;
   letter-spacing: -0.4px;
   color: var(--navy);
 }
@@ -101,7 +101,7 @@
   font-weight: 400;
 }
 .erp-environment {
-  padding: 7px 32px;
+  padding: 5px 20px;
   background: #f0e8de;
   color: #655157;
   font-size: 11px;
@@ -109,20 +109,20 @@
 }
 .erp-layout {
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
-  min-height: calc(100vh - 117px);
+  grid-template-columns: 196px minmax(0, 1fr);
+  min-height: calc(100vh - 87px);
 }
 .erp-nav {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 7px;
-  padding: 30px 14px 20px;
+  padding: 18px 10px 14px;
   background: var(--surface);
   border-right: 1px solid var(--line);
 }
 .erp-nav > span {
-  margin: 0 14px 16px;
+  margin: 0 10px 10px;
   color: var(--muted);
   font-size: 10px;
   letter-spacing: 0.15em;
@@ -132,7 +132,7 @@
   display: flex;
   justify-content: flex-start;
   gap: 11px;
-  padding: 13px 14px;
+  padding: 9px 10px;
   border: 1px solid transparent;
   background: transparent;
   color: #69565d;
@@ -169,7 +169,7 @@
   min-width: 0;
   width: 100%;
   max-width: 1440px;
-  padding: 34px 36px 54px;
+  padding: 22px 24px 36px;
 }
 .erp-main:focus,
 .erp-login:focus {
@@ -188,7 +188,7 @@
   color: #b4a3a7;
 }
 .erp-page-title h1 {
-  font-size: clamp(25px, 2.4vw, 32px);
+  font-size: 22px;
   letter-spacing: -0.9px;
   line-height: 1.25;
   margin: 0 0 10px;
@@ -204,18 +204,18 @@
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 26px;
+  padding: 16px;
   background: var(--surface);
   box-shadow: 0 3px 12px #342a2c04;
 }
 .erp-card h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: 16px;
   letter-spacing: -0.3px;
   font-weight: 650;
 }
 .erp-card h3 {
-  font-size: 14px;
+  font-size: 13px;
   margin: 0 0 12px;
   font-weight: 650;
 }
@@ -250,25 +250,25 @@
 .erp-shell textarea {
   width: 100%;
   max-width: 100%;
-  min-height: 44px;
+  min-height: 34px;
   border: 1px solid #cdbdb8;
   border-radius: 6px;
   background: #fffefa;
   color: var(--ink);
-  padding: 10px 12px;
+  padding: 7px 10px;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 13px;
 }
 .erp-shell input::placeholder {
   color: #87777c;
 }
 .erp-shell textarea {
   resize: vertical;
-  min-height: 86px;
+  min-height: 68px;
 }
 .erp-shell fieldset {
   display: grid;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
   padding: 0;
   margin: 0;
@@ -286,8 +286,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 44px;
-  padding: 10px 16px;
+  min-height: 34px;
+  padding: 7px 12px;
   border: 1px solid #cdbdb8;
   background: var(--surface);
   color: var(--ink);
@@ -312,9 +312,9 @@
 .erp-filters {
   display: flex;
   align-items: flex-end;
-  gap: 18px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding: 18px 22px;
+  padding: 12px 14px;
   margin-bottom: 22px;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -326,7 +326,7 @@
 }
 .erp-entry-panel {
   min-width: 0;
-  padding: 18px 20px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #faf6ef;
@@ -346,7 +346,7 @@
 }
 .erp-shell .scholars-admission-form {
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 14px;
 }
 .scholars-admission-form button {
   justify-self: start;
@@ -355,8 +355,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px;
-  margin-top: 30px;
+  gap: 14px;
+  margin-top: 22px;
   flex-wrap: wrap;
 }
 .erp-register-toolbar h3 {
@@ -400,7 +400,7 @@
 }
 .erp-table th,
 .erp-table td {
-  padding: 13px 15px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   font-size: 12px;
   vertical-align: top;
@@ -442,11 +442,11 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin: 24px 0;
+  margin: 16px 0;
 }
 .erp-kpis > div {
   min-width: 0;
-  padding: 18px;
+  padding: 12px;
   background: #faf6ef;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -458,7 +458,7 @@
 }
 .erp-kpis dd {
   margin: 9px 0 3px;
-  font-size: clamp(20px, 2vw, 28px);
+  font-size: 22px;
   color: var(--navy);
   font-weight: 650;
   letter-spacing: -0.7px;
@@ -492,7 +492,7 @@
   padding: 12px 14px;
   margin: 14px 0;
   font-size: 12px;
-  line-height: 1.65;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .erp-callout {
@@ -512,14 +512,14 @@
 .erp-setup-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: 14px;
   align-items: start;
 }
 .erp-setup-grid > form,
 .erp-config-summary {
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
 }
 .erp-setup-grid form {
   display: grid;
@@ -563,7 +563,7 @@
 .erp-roadmap {
   border-top: 1px solid var(--line);
   padding: 20px 0;
-  margin-top: 28px;
+  margin-top: 20px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -576,19 +576,14 @@
 }
 .scholars-welcome {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  max-width: 1080px;
-  margin: 56px auto;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 400px;
+  margin: 32px auto;
   border: 1px solid var(--line);
   border-radius: 16px;
   overflow: hidden;
   background: var(--surface);
   box-shadow: 0 14px 50px #702c4209;
-}
-.scholars-intro {
-  padding: 52px 44px;
-  background: var(--navy);
-  color: #fff8ec;
 }
 .scholars-eyebrow {
   font-size: 10px;
@@ -596,61 +591,18 @@
   letter-spacing: 0.13em;
   color: var(--muted);
 }
-.scholars-intro .scholars-eyebrow {
-  color: #e6cfaa;
-}
-.scholars-intro h1 {
-  font-family: Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(32px, 3.2vw, 44px);
-  line-height: 1.2;
-  letter-spacing: -1px;
-  margin: 36px 0 22px;
-}
-.scholars-intro > p {
-  font-size: 14px;
-  line-height: 1.8;
-  color: #eddde0;
-  max-width: 370px;
-}
-.scholars-intro-notes {
-  border-top: 1px solid #ffffff30;
-  margin: 34px 0;
-}
-.scholars-intro-notes > div {
-  position: relative;
-  padding: 22px 0 0 32px;
-}
-.scholars-intro-notes span {
-  position: absolute;
-  left: 0;
-  font-size: 11px;
-  color: #e6cfaa;
-}
-.scholars-intro-notes strong {
-  font-size: 12px;
-  font-weight: 550;
-}
-.scholars-intro-notes p,
-.scholars-intro small {
-  color: #e4cbd2;
-  font-size: 12px;
-}
-.scholars-intro-notes p {
-  margin: 6px 0 0;
-}
 .scholars-welcome .erp-login {
   max-width: none;
   width: 100%;
   margin: 0;
-  padding: 52px 44px;
+  padding: 28px;
   border: 0;
   border-radius: 0;
   box-shadow: none;
   align-self: center;
 }
-.scholars-welcome h2 {
-  font-size: 28px;
+.scholars-welcome h1 {
+  font-size: 22px;
   margin: 16px 0 12px;
   letter-spacing: -0.7px;
 }
@@ -659,10 +611,10 @@
   font-size: 13px;
 }
 .scholars-welcome form {
-  margin-top: 28px;
+  margin-top: 20px;
 }
 .scholars-welcome fieldset {
-  gap: 20px;
+  gap: 14px;
 }
 .scholars-login-help {
   font-size: 11px !important;
@@ -675,7 +627,7 @@ output.erp-login {
 }
 @media (max-width: 1050px) {
   .erp-layout {
-    grid-template-columns: 210px minmax(0, 1fr);
+    grid-template-columns: 190px minmax(0, 1fr);
   }
   .erp-main {
     padding: 28px 22px;
@@ -686,7 +638,8 @@ output.erp-login {
     gap: 8px;
   }
   .scholars-welcome {
-    margin: 32px 24px;
+    margin: 28px auto;
+    width: calc(100% - 32px);
   }
   .erp-setup-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -715,7 +668,7 @@ output.erp-login {
   .erp-nav {
     flex-direction: row;
     overflow-x: auto;
-    padding: 10px 12px;
+    padding: 7px 10px;
     gap: 8px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
@@ -746,22 +699,11 @@ output.erp-login {
   }
   .scholars-welcome {
     grid-template-columns: 1fr;
-    margin: 20px 14px;
+    margin: 24px auto;
+    width: calc(100% - 28px);
   }
-  .scholars-intro,
   .scholars-welcome .erp-login {
     padding: 30px 26px;
-  }
-  .scholars-intro h1 {
-    margin: 20px 0 14px;
-    font-size: 32px;
-  }
-  .scholars-intro-notes {
-    display: none;
-  }
-  .scholars-intro small {
-    display: block;
-    margin-top: 22px;
   }
 }
 @media (max-width: 480px) {
@@ -828,21 +770,21 @@ output.erp-login {
   max-width: 1100px;
 }
 .erp-standalone-portal > h1 {
-  font-size: clamp(25px, 3vw, 32px);
+  font-size: 22px;
   letter-spacing: -0.8px;
   margin: 0 0 26px;
 }
 .erp-child-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(310px, 100%), 1fr));
-  gap: 20px;
+  gap: 14px;
   margin: 22px 0;
 }
 .erp-child-card,
 .erp-request-card {
   border: 1px solid var(--line);
   border-radius: 9px;
-  padding: 20px;
+  padding: 16px;
   min-width: 0;
 }
 .erp-child-card > p,
@@ -921,7 +863,7 @@ output.erp-login {
   white-space: nowrap;
 }
 .erp-page-title {
-  padding-bottom: 22px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
 }
 .erp-card-title > label {
@@ -952,7 +894,7 @@ output.erp-login {
   z-index: 1;
 }
 .erp-table td {
-  line-height: 1.65;
+  line-height: 1.5;
 }
 .erp-register-toolbar + .erp-table-description {
   margin-top: 12px;
@@ -969,11 +911,11 @@ output.erp-login {
     position: sticky;
     top: 0;
     align-self: start;
-    height: 100dvh;
+    height: calc(100dvh - 20px);
     overflow-y: auto;
   }
   .erp-main {
-    padding: 32px 40px 60px;
+    padding: 22px 24px 36px;
   }
 }
 @media (max-width: 760px) {
@@ -1017,5 +959,15 @@ output.erp-login {
   }
   .erp-table th {
     position: static;
+  }
+}
+
+@media (pointer: coarse) {
+  .erp-shell button,
+  .erp-shell input,
+  .erp-shell select,
+  .erp-shell .erp-nav > button,
+  .erp-button {
+    min-height: 44px;
   }
 }

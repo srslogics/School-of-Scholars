@@ -116,3 +116,11 @@ Learning and notices are available to signed-in parents. In this single-school i
 ## Sidebar navigation
 
 All operational apps use expandable sidebar groups and nested module entries. Parents have My child, Fees, Academics, Requests and Communication. Staff have My work and Communication. School roles receive their authorised administration, student, finance, attendance, academic and request entries. The parent menu follows the selected module and moves to Request status after a successful leave submission. On mobile, Menu opens the grouped navigation and selecting a module closes it. Record permissions remain enforced by the API.
+
+## Connected fictional sample records
+
+The administrator can explicitly load a linked dataset from School setup > Development sample data > Load fictional sample data. The command npm run samples:school provides the same operation using the configured database. Choose only a development or presentation installation. Normal startup never loads this dataset.
+
+The dataset adds three clearly named sample classes, nine fictional students, faculty assignments, three guardian links, reviewed/returned/missing attendance examples, nine fee charges, six receipts, timetable periods, homework, published and draft exam papers, class/school notices, parent/faculty/staff requests and their histories. Existing school records, passwords and accounts are retained. The loader reuses the first available account of each required role. If multiple accounts share a role, check the generated assignments and guardian links in School setup before presenting.
+
+Loading is transactional and once per database. Repeating it preserves sample records you have edited. The result shows the fixed load date; select that date in attendance reports later. Sample homework and request dates are seven days after the load date. Sample timetable periods are on Sunday at 15:00, 16:00 and 17:00 to distinguish them from normal scheduling. A conflict rejects the whole operation. Individual sample records can be used in normal correction/payment/review workflows. A dataset removal workflow has not been implemented.

@@ -74,6 +74,36 @@ export function SetupPanel({
     }
   }
 
+  async function addSamples() {
+    if (
+      !window.confirm(
+        'Add clearly fictional sample records to this database? Existing records will be retained. Use only a development or presentation installation.',
+      )
+    )
+      return;
+    setBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const result = await request<{
+        loadedOn: string;
+        alreadyLoaded: boolean;
+      }>('sample-data', {});
+      setSetup(await request<Setup>('setup'));
+      setMessage(
+        (result.alreadyLoaded
+          ? 'Sample records already exist for '
+          : 'Fictional records added for ') +
+          result.loadedOn +
+          '. Attendance examples use that date.',
+      );
+      onSaved();
+    } catch (error) {
+      setError(errorMessage(error));
+    } finally {
+      setBusy(false);
+    }
+  }
   if (!setup)
     return error ? (
       <div role="alert" className="erp-error">
@@ -139,6 +169,17 @@ export function SetupPanel({
         </p>
       )}
       {message && <output className="erp-success">{message}</output>}
+      <details className="erp-sample-tools">
+        <summary>Development sample data</summary>
+        <p>
+          Add a separate set of fictional classes and records across the apps.
+          Existing data is retained. Run once per database.
+        </p>
+        <button type="button" disabled={busy} onClick={() => void addSamples()}>
+          Load fictional sample data
+        </button>
+      </details>
+
       <div className="erp-setup-workbench">
         <section className="erp-setup-register">
           <header className="erp-register-heading">

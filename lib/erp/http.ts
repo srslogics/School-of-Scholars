@@ -1,3 +1,4 @@
+import { loadSampleData } from './sample-data';
 import { academics, updateAcademics } from './academics';
 import { portal, updatePortal, portalDate } from './portals';
 import { fees, updateFees } from './fees';
@@ -109,6 +110,8 @@ export function createHandler(db: Database, publicOrigin?: string) {
             'Set-Cookie': sessionCookie('', secure),
           });
         }
+        if (method === 'POST' && endpoint === 'sample-data')
+          return json(await loadSampleData(db, account));
         if (method === 'GET' && endpoint === 'session')
           return json(await workspace(db, account));
         if (endpoint === 'academics')

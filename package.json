@@ -21,7 +21,8 @@
     "bootstrap:school": "tsx scripts/bootstrap-campus.ts",
     "migrate:erp": "tsx scripts/migrate-erp.ts",
     "reset:passwords": "tsx scripts/reset-passwords.ts",
-    "prepare:erp": "tsx scripts/prepare-erp.ts"
+    "prepare:erp": "tsx scripts/prepare-erp.ts",
+    "samples:school": "tsx scripts/load-sample-data.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

@@ -130,3 +130,77 @@ void test('fee collection requires noncash references and gives explicit empty l
     globalThis.fetch = original;
   }
 });
+
+void test('opening fees from a student keeps balances and payment options scoped to that student', async () => {
+  const original = globalThis.fetch;
+  const second = {
+    ...view,
+    students: [
+      ...view.students,
+      {
+        id: 's2',
+        name: 'Another Learner',
+        classId: 'c1',
+        roll: '2',
+        effectiveOn: '2026-11-19',
+      },
+    ],
+    charges: [
+      ...view.charges,
+      {
+        id: 'charge-2',
+        studentId: 's2',
+        description: 'Other tuition',
+        amount: 300000,
+        paid: 0,
+        dueOn: '2026-12-01',
+      },
+    ],
+  };
+  globalThis.fetch = async () => Response.json(second);
+  try {
+    render(<FeesPanel date="2026-11-19" initialStudentId="s1" />);
+    const ledger = await screen.findByLabelText('Student ledger');
+    assert.equal((ledger as unknown as HTMLSelectElement).value, 's1');
+    const charge = () =>
+      screen.getByLabelText(
+        'Outstanding charge',
+      ) as unknown as HTMLSelectElement;
+    assert.equal(charge().options.length, 1);
+    assert.equal(charge().value, 'charge-1');
+    fireEvent.change(ledger, { target: { value: 's2' } });
+    assert.equal(charge().options.length, 1);
+    assert.equal(charge().value, 'charge-2');
+    fireEvent.change(ledger, { target: { value: '' } });
+    assert.equal(charge().options.length, 2);
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('student register fee action passes the correct student identifier', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => Response.json(view);
+  let chosen = '';
+  try {
+    render(
+      <AdmissionsPanel
+        date="2026-11-19"
+        onSaved={() => {}}
+        onOpenFees={(id) => {
+          chosen = id;
+        }}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: 'View fees for Fictional Learner',
+      }),
+    );
+    assert.equal(chosen, 's1');
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});

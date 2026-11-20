@@ -912,3 +912,110 @@ output.erp-login {
 .erp-portal > .erp-entry-panel form {
   max-width: 600px;
 }
+
+.erp-today {
+  color: var(--muted);
+  font-size: 11px;
+  padding-right: 16px;
+  border-right: 1px solid var(--line);
+  white-space: nowrap;
+}
+.erp-page-title {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.erp-card-title > label {
+  width: min(310px, 100%);
+}
+.erp-card-title > div {
+  max-width: 620px;
+}
+.erp-card > .erp-callout {
+  margin-top: 18px;
+}
+.erp-entry-panel {
+  background: #fbf8f2;
+}
+.erp-entry-panel summary {
+  min-height: 34px;
+  display: list-item;
+}
+.erp-entry-panel summary:hover {
+  color: #552033;
+}
+.erp-scroll {
+  max-height: 480px;
+}
+.erp-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.erp-table td {
+  line-height: 1.65;
+}
+.erp-register-toolbar + .erp-table-description {
+  margin-top: 12px;
+}
+.erp-actions > button,
+.scholars-admission-form > button {
+  min-width: 120px;
+}
+.erp-request-card {
+  background: #fffefa;
+}
+@media (min-width: 1051px) {
+  .erp-nav {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+  .erp-main {
+    padding: 32px 40px 60px;
+  }
+}
+@media (max-width: 760px) {
+  .erp-today {
+    display: none;
+  }
+  .erp-nav {
+    scrollbar-width: thin;
+  }
+  .erp-page-title {
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+  }
+  .erp-card-title > label {
+    width: 100%;
+  }
+  .erp-register-toolbar {
+    gap: 12px;
+  }
+  .erp-register-toolbar label {
+    width: 100%;
+  }
+  .erp-scroll {
+    max-height: 440px;
+  }
+  .erp-filters label {
+    min-width: min(150px, 100%);
+  }
+}
+@media (max-width: 480px) {
+  .erp-actions > button {
+    flex: 1;
+  }
+  .scholars-admission-form > button {
+    width: 100%;
+  }
+}
+@media print {
+  .erp-scroll {
+    max-height: none;
+  }
+  .erp-table th {
+    position: static;
+  }
+}

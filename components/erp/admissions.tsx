@@ -9,9 +9,11 @@ type View = Awaited<ReturnType<typeof admissions>>;
 export function AdmissionsPanel({
   date,
   onSaved,
+  onOpenFees,
 }: {
   date: string;
   onSaved: () => void;
+  onOpenFees?: (studentId: string) => void;
 }) {
   const [view, setView] = useState<View>();
   const [error, setError] = useState('');
@@ -171,12 +173,13 @@ export function AdmissionsPanel({
                   <th scope="col">Class</th>
                   <th scope="col">Roll</th>
                   <th scope="col">Admitted</th>
+                  {onOpenFees && <th scope="col">Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {!students.length && (
                   <tr>
-                    <td colSpan={4}>
+                    <td colSpan={onOpenFees ? 5 : 4}>
                       {search
                         ? 'No students match your search.'
                         : 'No students enrolled. Use Enrol a student to add the first record.'}
@@ -191,6 +194,17 @@ export function AdmissionsPanel({
                     </td>
                     <td>{s.roll}</td>
                     <td>{s.effectiveOn}</td>
+                    {onOpenFees && (
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => onOpenFees(s.id)}
+                          aria-label={'View fees for ' + s.name}
+                        >
+                          View fees
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

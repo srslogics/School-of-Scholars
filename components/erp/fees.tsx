@@ -8,7 +8,15 @@ const inr = (paise: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(
     paise / 100,
   );
-export function FeesPanel({ date }: { date: string }) {
+export function FeesPanel({
+  date,
+  initialStudentId,
+}: {
+  date: string;
+  initialStudentId?: string;
+}) {
+  const [studentId, setStudentId] = useState(initialStudentId ?? '');
+  const [reload, setReload] = useState(0);
   const [view, setView] = useState<View>();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -20,7 +28,7 @@ export function FeesPanel({ date }: { date: string }) {
     void request<View>('fees')
       .then(setView)
       .catch((e) => setError(errorMessage(e)));
-  }, []);
+  }, [reload]);
   async function submit(
     event: SubmitEvent<HTMLFormElement>,
     action: 'charge' | 'payment',
@@ -73,13 +81,53 @@ export function FeesPanel({ date }: { date: string }) {
         ) : (
           <output>Loading fee records…</output>
         )}
+        {error && (
+          <button
+            type="button"
+            onClick={() => {
+              setError('');
+              setReload((r) => r + 1);
+            }}
+          >
+            Try again
+          </button>
+        )}
       </section>
     );
-  const total = view.charges.reduce((sum, c) => sum + c.amount, 0);
-  const paid = view.receipts.reduce((sum, r) => sum + r.amount, 0);
+  const charges = view.charges.filter(
+    (c) => !studentId || c.studentId === studentId,
+  );
+  const receipts = view.receipts.filter((r) =>
+    charges.some((c) => c.id === r.chargeId),
+  );
+  const total = charges.reduce((sum, c) => sum + c.amount, 0);
+  const paid = receipts.reduce((sum, r) => sum + r.amount, 0);
   return (
     <section className="erp-card">
-      <h2>Fees & collections</h2>
+      <div className="erp-card-title">
+        <div>
+          <h2>Student fee ledger</h2>
+          <p>
+            Select a student to see charges, payments and the outstanding
+            balance.
+          </p>
+        </div>
+        <label>
+          Student ledger
+          <select
+            value={studentId}
+            disabled={busy}
+            onChange={(e) => setStudentId(e.target.value)}
+          >
+            <option value="">All students</option>
+            {view.students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} · Roll {s.roll}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <p className="erp-callout">
         Record charges and confirmed payments. Receipts record the collection
         mode and staff member.
@@ -117,12 +165,19 @@ export function FeesPanel({ date }: { date: string }) {
               <legend>Fee charge details</legend>
               <label>
                 Student
-                <select name="studentId" required>
-                  {view.students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} · Roll {s.roll}
-                    </option>
-                  ))}
+                <select
+                  name="studentId"
+                  required
+                  defaultValue={studentId}
+                  key={studentId}
+                >
+                  {view.students
+                    .filter((s) => !studentId || s.id === studentId)
+                    .map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} · Roll {s.roll}
+                      </option>
+                    ))}
                 </select>
               </label>
               <label>
@@ -153,20 +208,20 @@ export function FeesPanel({ date }: { date: string }) {
         </details>
         <details className="erp-entry-panel">
           <summary>Record a payment</summary>
-          {!view.charges.some((c) => c.paid < c.amount) && (
+          {!charges.some((c) => c.paid < c.amount) && (
             <p className="erp-callout">
               There are no outstanding charges to collect.
             </p>
           )}
           <form aria-busy={busy} onSubmit={(e) => void submit(e, 'payment')}>
             <fieldset
-              disabled={busy || !view.charges.some((c) => c.paid < c.amount)}
+              disabled={busy || !charges.some((c) => c.paid < c.amount)}
             >
               <legend>Collection details</legend>
               <label>
                 Outstanding charge
-                <select name="chargeId" required>
-                  {view.charges
+                <select name="chargeId" required key={studentId}>
+                  {charges
                     .filter((c) => c.paid < c.amount)
                     .map((c) => (
                       <option key={c.id} value={c.id}>
@@ -219,7 +274,7 @@ export function FeesPanel({ date }: { date: string }) {
               </label>
               <button
                 className="erp-primary"
-                disabled={busy || !view.charges.some((c) => c.paid < c.amount)}
+                disabled={busy || !charges.some((c) => c.paid < c.amount)}
               >
                 {busy ? 'Saving…' : 'Record payment'}
               </button>
@@ -245,14 +300,14 @@ export function FeesPanel({ date }: { date: string }) {
             </tr>
           </thead>
           <tbody>
-            {!view.charges.length && (
+            {!charges.length && (
               <tr>
                 <td colSpan={6}>
                   No fee charges yet. Add a charge for an enrolled student.
                 </td>
               </tr>
             )}
-            {view.charges.map((c) => (
+            {charges.map((c) => (
               <tr key={c.id}>
                 <td>{view.students.find((s) => s.id === c.studentId)?.name}</td>
                 <td>{c.description}</td>
@@ -283,7 +338,7 @@ export function FeesPanel({ date }: { date: string }) {
             </tr>
           </thead>
           <tbody>
-            {!view.receipts.length && (
+            {!receipts.length && (
               <tr>
                 <td colSpan={6}>
                   No collections recorded. Saved receipts appear here after a
@@ -291,7 +346,7 @@ export function FeesPanel({ date }: { date: string }) {
                 </td>
               </tr>
             )}
-            {view.receipts.map((r) => (
+            {receipts.map((r) => (
               <tr key={r.id}>
                 <td className="erp-receipt-id">{r.id}</td>
                 <td>

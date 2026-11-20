@@ -109,6 +109,19 @@ export function ErpWorkspace({ initial }: { initial: Initial }) {
         </div>
         <div className="erp-account">
           {workspace && (
+            <time className="erp-today" dateTime={workspace.date}>
+              {new Date(workspace.date + 'T00:00:00Z').toLocaleDateString(
+                'en-IN',
+                {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                  timeZone: 'Asia/Kolkata',
+                },
+              )}
+            </time>
+          )}
+          {workspace && (
             <>
               <UserRound size={18} aria-hidden="true" />
               <span className="erp-account-name">
@@ -260,6 +273,7 @@ function SignedWorkspace({
   const [schoolId, setSchoolId] = useState(
     allowedInitial?.schoolId ?? schools[0]?.id ?? '',
   );
+  const [feeStudentId, setFeeStudentId] = useState<string>();
   const [classId, setClassId] = useState(allowedInitial?.id ?? '');
   const [date, setDate] = useState(initial.date ?? workspace.date);
   const [tab, setTab] = useState(
@@ -274,7 +288,6 @@ function SignedWorkspace({
   const scopedClasses = classes.filter((row) => row.schoolId === schoolId);
   const selectedClass =
     scopedClasses.find((row) => row.id === classId) ?? scopedClasses[0];
-  const school = schools.find((row) => row.id === schoolId);
   const canReport =
     account.role === 'principal' ||
     account.role === 'officer' ||
@@ -323,6 +336,7 @@ function SignedWorkspace({
             aria-current={tab === 'fees' ? 'page' : undefined}
             onClick={() => {
               setBadLink(false);
+              setFeeStudentId(undefined);
               setTab('fees');
             }}
           >
@@ -395,16 +409,17 @@ function SignedWorkspace({
                       : 'Class register'}
           </h1>
           <p>
-            {school?.name ?? 'Your assigned school workspace'} ·{' '}
-            {tab === 'fees'
-              ? 'Track student balances and record confirmed collections.'
-              : tab === 'admissions'
-                ? 'Enrol a learner and keep their class record connected.'
-                : tab === 'setup'
-                  ? 'Manage classes, students and staff access.'
-                  : tab === 'report'
-                    ? 'See reported attendance and registers awaiting submission.'
-                    : 'Choose a class, mark attendance and submit for review.'}
+            {tab === 'requests'
+              ? 'Track requests and recorded decisions.'
+              : tab === 'fees'
+                ? 'Track student balances and record confirmed collections.'
+                : tab === 'admissions'
+                  ? 'Enrol a learner and keep their class record connected.'
+                  : tab === 'setup'
+                    ? 'Manage classes, students and staff access.'
+                    : tab === 'report'
+                      ? 'See reported attendance and registers awaiting submission.'
+                      : 'Choose a class, mark attendance and submit for review.'}
           </p>
         </header>
         {(tab === 'register' || tab === 'report') && (
@@ -451,9 +466,20 @@ function SignedWorkspace({
         ) : tab === 'requests' ? (
           <PortalPanel account={account} date={workspace.date} />
         ) : tab === 'fees' ? (
-          <FeesPanel date={workspace.date} />
+          <FeesPanel
+            key={feeStudentId ?? 'all'}
+            date={workspace.date}
+            initialStudentId={feeStudentId}
+          />
         ) : tab === 'admissions' ? (
-          <AdmissionsPanel date={workspace.date} onSaved={refresh} />
+          <AdmissionsPanel
+            date={workspace.date}
+            onSaved={refresh}
+            onOpenFees={(id) => {
+              setFeeStudentId(id);
+              setTab('fees');
+            }}
+          />
         ) : tab === 'setup' ? (
           <SetupPanel date={workspace.date} onSaved={refresh} />
         ) : tab === 'report' ? (
@@ -478,19 +504,21 @@ function SignedWorkspace({
             to check your assignment.
           </p>
         )}
-        <details className="erp-roadmap">
-          <summary>Product development status</summary>
-          <p>
-            Available workflows include class setup, staff assignments,
-            admissions, attendance review, fee charges and payment receipts.
-          </p>
-          <p>
-            Fee policies, receipt numbering, concessions, refunds, collection
-            close, full accounting, academic years and student transfers need
-            further implementation and school approval. Staff and payroll,
-            assessments, parent access and campus services are planned work.
-          </p>
-        </details>
+        {account.role === 'administrator' && (
+          <details className="erp-roadmap">
+            <summary>Product development status</summary>
+            <p>
+              Available workflows include class setup, staff assignments,
+              admissions, attendance review, fee charges and payment receipts.
+            </p>
+            <p>
+              Fee policies, receipt numbering, concessions, refunds, collection
+              close, full accounting, academic years and student transfers need
+              further implementation and school approval. Staff and payroll,
+              assessments and additional campus services are planned work.
+            </p>
+          </details>
+        )}
       </div>
     </div>
   );

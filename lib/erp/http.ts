@@ -1,3 +1,4 @@
+import { academics, updateAcademics } from './academics';
 import { portal, updatePortal, portalDate } from './portals';
 import { fees, updateFees } from './fees';
 import { admissions, admit } from './admissions';
@@ -110,6 +111,12 @@ export function createHandler(db: Database, publicOrigin?: string) {
         }
         if (method === 'GET' && endpoint === 'session')
           return json(await workspace(db, account));
+        if (endpoint === 'academics')
+          return json(
+            method === 'GET'
+              ? await academics(db, account)
+              : await updateAcademics(db, account, body),
+          );
         if (endpoint === 'portal')
           return json(
             method === 'GET'

@@ -32,6 +32,7 @@ const { render, screen, fireEvent, waitFor, cleanup } =
 const { AdmissionsPanel } = await import('../components/erp/admissions');
 const { FeesPanel } = await import('../components/erp/fees');
 const { SetupPanel } = await import('../components/erp/setup');
+const { AcademicPanel } = await import('../components/erp/academics');
 const { PortalPanel } = await import('../components/erp/portals');
 
 const view = {
@@ -411,6 +412,61 @@ void test('parent child switch updates the visible child and the leave-request t
       (screen.getAllByLabelText('Child')[1] as unknown as HTMLSelectElement)
         .value,
       's2',
+    );
+  } finally {
+    cleanup();
+    globalThis.fetch = original;
+  }
+});
+
+void test('parent report cards show zero marks and expose no mark-entry or publication controls', async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({
+      classes: [{ id: 'c', schoolId: 'school', grade: '5', section: 'A' }],
+      students: [
+        { id: 'child', name: 'Fictional Child', classId: 'c', roll: '1' },
+      ],
+      schools: ['school'],
+      teachers: [],
+      timetable: [],
+      homework: [],
+      notices: [],
+      exams: [
+        {
+          id: 'exam',
+          classId: 'c',
+          title: 'Term 1',
+          subject: 'Mathematics',
+          examOn: '2026-11-20',
+          maxScore: 100,
+          status: 'published',
+        },
+      ],
+      results: [{ examId: 'exam', studentId: 'child', score: 0 }],
+      examRoster: [{ examId: 'exam', studentId: 'child' }],
+      canSchedule: false,
+      canTeach: false,
+      canPublish: false,
+    });
+  try {
+    render(
+      <AcademicPanel
+        account={{
+          id: 'parent',
+          username: 'parent',
+          name: 'Parent',
+          role: 'parent',
+        }}
+        initialArea="reports"
+      />,
+    );
+    await screen.findByRole('row', { name: 'Mathematics 0 100' });
+    assert.ok(screen.getByRole('row', { name: 'Total 0 100' }));
+    assert.equal(screen.queryByRole('button', { name: 'Save marks' }), null);
+    assert.equal(
+      screen.queryByRole('button', { name: 'Approve and publish results' }),
+      null,
     );
   } finally {
     cleanup();

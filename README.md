@@ -92,3 +92,19 @@ Faculty use /faculty-app, principals use /principal-app, school office use /offi
 ## Removed Management app
 
 The Management app route and new Management account have been removed. Legacy management/commissioner accounts in the Katol database are denied sign-in and their existing sessions are rejected. Historical account rows are retained to preserve audit references. Active apps are ERP, Faculty, Principal, School Office, Parent and Staff.
+
+## Academic modules — first operational workflows
+
+The board is CBSE, confirmed by the client. No grade bands or board-compliant report-card template have been assumed.
+
+Timetable supports recurring weekday periods, assigned faculty, time validation, conflict detection for both class and teacher, and audited period removal. Academic-year/term applicability, holidays, substitutions and timetable editing require further work.
+
+Faculty can assign dated homework to assigned classes. Linked parents see the instructions and due dates. Uploads, student submissions, marking and completion tracking are pending.
+
+Faculty/principals can create subject papers under an exam/term title. The current class roster is snapshotted for the paper. Whole-number marks are validated against a maximum from 1 to 1000. Principals/administrators publish only complete papers on or after the examination date. Published marks are locked; an audited correction/reapproval workflow is pending.
+
+Report cards show published subject results grouped by student and exam title, with marks/max totals and browser printing. They include only the displayed published subjects. Confirm the school's CBSE class-specific grading, term/year configuration, attendance/co-scholastic fields, signature requirements and final template before formal issue. They are not yet final CBSE-format report cards.
+
+Communication supports class notices by assigned faculty and school-wide notices by principal/administrator. Parents receive notices only through guardian-linked classes, and staff/office users see school-wide notices. Read receipts persist. This release provides in-app notices; email, SMS, WhatsApp and push delivery are pending.
+
+Academic mutations record actor/time audit entries. Client request IDs protect retries within the same form session. Reloading a form generates a new request ID, so check saved records before repeating an uncertain operation. Migration version 3 is applied at normal startup.

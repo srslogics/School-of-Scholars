@@ -107,6 +107,49 @@ CREATE TABLE IF NOT EXISTS school (
       note TEXT NOT NULL, happened_at TEXT NOT NULL
     );
     INSERT INTO schema_migration VALUES (2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) ON CONFLICT DO NOTHING;
+
+    CREATE TABLE IF NOT EXISTS academic_slot (
+      id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES class_section(id),
+      teacher_id TEXT NOT NULL REFERENCES account(id), weekday INTEGER NOT NULL CHECK(weekday BETWEEN 1 AND 7),
+      starts TEXT NOT NULL, ends TEXT NOT NULL, subject TEXT NOT NULL, CHECK(starts < ends)
+    );
+    CREATE TABLE IF NOT EXISTS academic_homework (
+      id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES class_section(id), subject TEXT NOT NULL,
+      title TEXT NOT NULL, instructions TEXT NOT NULL, due_on TEXT NOT NULL,
+      actor_id TEXT NOT NULL REFERENCES account(id), created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS academic_exam (
+      id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES class_section(id), title TEXT NOT NULL,
+      subject TEXT NOT NULL, exam_on TEXT NOT NULL, max_score INTEGER NOT NULL CHECK(max_score > 0),
+      status TEXT NOT NULL CHECK(status IN ('draft','published')), actor_id TEXT NOT NULL REFERENCES account(id),
+      UNIQUE(class_id,title,subject)
+    );
+    CREATE TABLE IF NOT EXISTS academic_exam_student (
+      exam_id TEXT NOT NULL REFERENCES academic_exam(id), student_id TEXT NOT NULL REFERENCES enrolment(id),
+      PRIMARY KEY(exam_id,student_id)
+    );
+    CREATE TABLE IF NOT EXISTS academic_mark (
+      exam_id TEXT NOT NULL, student_id TEXT NOT NULL, score INTEGER NOT NULL CHECK(score >= 0),
+      actor_id TEXT NOT NULL REFERENCES account(id), updated_at TEXT NOT NULL,
+      PRIMARY KEY(exam_id,student_id), FOREIGN KEY(exam_id,student_id) REFERENCES academic_exam_student(exam_id,student_id)
+    );
+    CREATE TABLE IF NOT EXISTS academic_notice (
+      id TEXT PRIMARY KEY, school_id TEXT NOT NULL REFERENCES school(id),
+      class_id TEXT REFERENCES class_section(id), title TEXT NOT NULL, message TEXT NOT NULL,
+      actor_id TEXT NOT NULL REFERENCES account(id), created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS academic_notice_read (
+      notice_id TEXT NOT NULL REFERENCES academic_notice(id), account_id TEXT NOT NULL REFERENCES account(id),
+      read_at TEXT NOT NULL, PRIMARY KEY(notice_id,account_id)
+    );
+    CREATE TABLE IF NOT EXISTS academic_operation (
+      request_key TEXT PRIMARY KEY, account_id TEXT NOT NULL REFERENCES account(id), payload TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS academic_event (
+      id TEXT PRIMARY KEY, record_id TEXT NOT NULL, actor_id TEXT NOT NULL REFERENCES account(id),
+      action TEXT NOT NULL, payload TEXT NOT NULL CHECK(json_valid(payload)), happened_at TEXT NOT NULL
+    );
+    INSERT INTO schema_migration VALUES (3, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) ON CONFLICT DO NOTHING;
     CREATE INDEX IF NOT EXISTS register_day ON register(day, class_id);
 `;
 

@@ -1,4 +1,5 @@
 'use client';
+import { AcademicPanel, type AcademicArea } from './academics';
 import { PortalPanel } from './portals';
 import { FeesPanel } from './fees';
 import { AdmissionsPanel } from './admissions';
@@ -46,6 +47,7 @@ export function ErpWorkspace({
   initial: Initial;
   entryPath?: WorkspacePath;
 }) {
+  const [portalArea, setPortalArea] = useState<'daily' | 'academics'>('daily');
   const [workspace, setWorkspace] = useState<Workspace>();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -191,7 +193,41 @@ export function ErpWorkspace({
                   ? 'Your child’s school day'
                   : 'Your staff workspace'}
               </h1>
-              <PortalPanel account={workspace.account} date={workspace.date} />
+              <nav className="erp-setup-tabs" aria-label="App workspace">
+                <button
+                  type="button"
+                  aria-current={portalArea === 'daily' ? 'page' : undefined}
+                  onClick={() => setPortalArea('daily')}
+                >
+                  {workspace.account.role === 'parent'
+                    ? 'My children'
+                    : 'My requests'}
+                </button>
+                <button
+                  type="button"
+                  aria-current={portalArea === 'academics' ? 'page' : undefined}
+                  onClick={() => setPortalArea('academics')}
+                >
+                  {workspace.account.role === 'parent'
+                    ? 'Learning & notices'
+                    : 'Communication'}
+                </button>
+              </nav>
+              {portalArea === 'daily' ? (
+                <PortalPanel
+                  account={workspace.account}
+                  date={workspace.date}
+                />
+              ) : (
+                <AcademicPanel
+                  account={workspace.account}
+                  initialArea={
+                    workspace.account.role === 'staff'
+                      ? 'communication'
+                      : 'timetable'
+                  }
+                />
+              )}
             </div>
           ) : (
             <SignedWorkspace
@@ -384,6 +420,32 @@ function SignedWorkspace({
             {account.role === 'teacher' ? 'My requests' : 'School requests'}
           </button>
         )}
+        {['timetable', 'homework', 'exams', 'reports', 'communication']
+          .filter(
+            (key) => account.role !== 'officer' || key === 'communication',
+          )
+          .map((key) => (
+            <button
+              type="button"
+              key={key}
+              aria-current={tab === key ? 'page' : undefined}
+              onClick={() => {
+                setBadLink(false);
+                setTab(key);
+              }}
+            >
+              <GraduationCap size={18} aria-hidden="true" />
+              {
+                {
+                  timetable: 'Timetable',
+                  homework: 'Homework',
+                  exams: 'Examinations',
+                  reports: 'Report cards',
+                  communication: 'Communication',
+                }[key]
+              }
+            </button>
+          ))}
         <div className="erp-nav-footer">
           <GraduationCap size={20} aria-hidden="true" />
           <strong>School of Scholars</strong>
@@ -397,32 +459,54 @@ function SignedWorkspace({
             {roleLabel[account.role]}
           </p>
           <h1>
-            {tab === 'requests'
-              ? account.role === 'teacher'
-                ? 'Faculty requests'
-                : 'School requests'
-              : tab === 'fees'
-                ? 'Fees & collections'
-                : tab === 'admissions'
-                  ? 'Admissions & students'
-                  : tab === 'setup'
-                    ? 'School setup'
-                    : tab === 'report'
-                      ? 'Attendance overview'
-                      : 'Class register'}
+            {[
+              'timetable',
+              'homework',
+              'exams',
+              'reports',
+              'communication',
+            ].includes(tab)
+              ? ({
+                  timetable: 'Timetable',
+                  homework: 'Homework',
+                  exams: 'Examinations',
+                  reports: 'Report cards',
+                  communication: 'Communication',
+                }[tab] ?? 'Academics')
+              : tab === 'requests'
+                ? account.role === 'teacher'
+                  ? 'Faculty requests'
+                  : 'School requests'
+                : tab === 'fees'
+                  ? 'Fees & collections'
+                  : tab === 'admissions'
+                    ? 'Admissions & students'
+                    : tab === 'setup'
+                      ? 'School setup'
+                      : tab === 'report'
+                        ? 'Attendance overview'
+                        : 'Class register'}
           </h1>
           <p>
-            {tab === 'requests'
-              ? 'Track requests and recorded decisions.'
-              : tab === 'fees'
-                ? 'Track student balances and record confirmed collections.'
-                : tab === 'admissions'
-                  ? 'Enrol a learner and keep their class record connected.'
-                  : tab === 'setup'
-                    ? 'Manage classes, students and staff access.'
-                    : tab === 'report'
-                      ? 'See reported attendance and registers awaiting submission.'
-                      : 'Choose a class, mark attendance and submit for review.'}
+            {[
+              'timetable',
+              'homework',
+              'exams',
+              'reports',
+              'communication',
+            ].includes(tab)
+              ? 'School academics and published learning records.'
+              : tab === 'requests'
+                ? 'Track requests and recorded decisions.'
+                : tab === 'fees'
+                  ? 'Track student balances and record confirmed collections.'
+                  : tab === 'admissions'
+                    ? 'Enrol a learner and keep their class record connected.'
+                    : tab === 'setup'
+                      ? 'Manage classes, students and staff access.'
+                      : tab === 'report'
+                        ? 'See reported attendance and registers awaiting submission.'
+                        : 'Choose a class, mark attendance and submit for review.'}
           </p>
         </header>
         {(tab === 'register' || tab === 'report') && (
@@ -466,6 +550,19 @@ function SignedWorkspace({
           <p role="alert" className="erp-error">
             Record not found in your workspace.
           </p>
+        ) : [
+            'timetable',
+            'homework',
+            'exams',
+            'reports',
+            'communication',
+          ].includes(tab) ? (
+          <AcademicPanel
+            key={tab}
+            account={account}
+            initialArea={tab as AcademicArea}
+            embedded
+          />
         ) : tab === 'requests' ? (
           <PortalPanel account={account} date={workspace.date} />
         ) : tab === 'fees' ? (
@@ -522,7 +619,8 @@ function SignedWorkspace({
               Fee policies, receipt numbering, concessions, refunds, collection
               close, full accounting, academic years and student transfers need
               further implementation and school approval. Staff and payroll,
-              assessments and additional campus services are planned work.
+              board-specific grading, final report templates and additional
+              campus services need further configuration.
             </p>
           </details>
         )}

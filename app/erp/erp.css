@@ -1312,3 +1312,92 @@ output.erp-login {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.erp-shell [hidden] {
+  display: none !important;
+}
+.erp-academic-entry {
+  margin-top: 18px;
+  max-width: 560px;
+}
+.erp-academic-entry form {
+  margin-top: 14px;
+}
+.erp-homework-list,
+.erp-notice-list {
+  display: grid;
+  gap: 14px;
+}
+.erp-homework-list article,
+.erp-notice-list article {
+  background: var(--surface);
+  border-left: 3px solid var(--navy);
+  padding: 14px 18px;
+}
+.erp-homework-list header,
+.erp-notice-list header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.erp-homework-list h3,
+.erp-notice-list h3 {
+  font-size: 14px;
+  margin: 0;
+}
+.erp-homework-list header span,
+.erp-notice-list small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.erp-exam-selector {
+  max-width: 420px;
+  margin-bottom: 12px;
+}
+.erp-mark-form {
+  display: flex;
+  gap: 8px;
+}
+.erp-mark-form input {
+  max-width: 100px;
+}
+.erp-report-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.erp-report-selectors label {
+  min-width: min(240px, 100%);
+}
+.erp-report-card {
+  max-width: 760px;
+  background: white;
+  padding: 24px;
+  border: 1px solid var(--line);
+}
+.erp-report-card h2 {
+  font-size: 18px;
+}
+.erp-report-card h3 {
+  font-size: 15px;
+}
+.erp-report-card header {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+.erp-report-card .erp-table tfoot {
+  font-weight: 650;
+}
+@media print {
+  .erp-academic-tabs,
+  .erp-report-selectors,
+  .erp-report-card button {
+    display: none !important;
+  }
+  .erp-report-card {
+    padding: 0;
+    border: 0;
+    max-width: none;
+  }
+}

@@ -25,7 +25,7 @@ void test('campus setup, admissions, fees, retry protection, isolation and recei
     await initializeDatabase(db);
     await bootstrapCampus(db, () => 'Fictional-Testing-6290', true);
     assert.equal((await many(db, 'SELECT * FROM school')).length, 1);
-    assert.equal((await many(db, 'SELECT * FROM schema_migration')).length, 2);
+    assert.equal((await many(db, 'SELECT * FROM schema_migration')).length, 3);
     await assert.rejects(
       bootstrapCampus(db, () => 'Fictional-Testing-6290'),
       /empty dedicated/,
